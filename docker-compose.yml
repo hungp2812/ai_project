@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  backend_api:
+    build:
+      context: ./backend_api
+    container_name: backend_api
+    ports:
+      - "5000:5000"
+    environment:
+      MONGO_URI: mongodb://root:pass123@mongo:27017
+    depends_on:
+      - mongo
+    networks:
+      - ai_network
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: pass123
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - ai_network
+
+networks:
+  ai_network:
+volumes:
+  mongo_data:
