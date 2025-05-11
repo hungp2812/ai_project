@@ -1,9 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from bson import ObjectId
 
-from backend_api.modules.utils.db_connector import dbConnector
 from backend_api.modules.utils.decorators import admin_required
-from backend_api.modules.controllers.UserManager import UserManager
 from backend_api.modules.controllers.AdminManager import AdminManager
 
 admin_bp = Blueprint("admin", __name__)
