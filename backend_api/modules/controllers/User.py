@@ -6,7 +6,7 @@ class UserRole(str, Enum):
     USER = "user"
 
 class User:
-    def __init__(self, user_id: str, username: str, password: Optional[str], email: str, role: UserRole):
+    def __init__(self, user_id: str, username: str, password: Optional[str], email: str, role: UserRole, latest_face_recognition: Optional[str] = None):
         """Initialize a User object with user ID, username, password, email, and role."""
         self.user_id = user_id
         self.username = username

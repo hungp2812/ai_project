@@ -1,6 +1,6 @@
 from werkzeug.security import check_password_hash
 from flask import session
-from backend_api.modules.utils.db_connector import dbConnector
+from modules.utils.db_connector import dbConnector
 
 def authenticate_user(username: str, password: str):
     """

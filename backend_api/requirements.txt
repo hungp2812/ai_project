@@ -1,5 +1,4 @@
-fastapi
-uvicorn
-pydantic
 pymongo
 flask
+flask_cors
+werkzeug

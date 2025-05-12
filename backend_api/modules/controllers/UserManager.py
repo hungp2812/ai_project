@@ -1,5 +1,7 @@
 from User import User, UserRole
-from backend_api.modules.utils.db_connector import dbConnector
+from modules.utils.db_connector import dbConnector
+# from werkzeug.security import generate_password_hash
+from bson import ObjectId
 # from cv2 import VideoCapture, imshow
 
 class UserManager:
@@ -9,11 +11,14 @@ class UserManager:
     """
     def __init__(self, user_id: str):
         self.db = dbConnector()
-        self.user = self.db.get_table("users").find_one({"user_id": user_id})
+        self.user = self.db.get_table("users").find_one({"_id": ObjectId(user_id)})
         if not self.user:
             raise ValueError("User not found.")
+        
+        # print(f"UserManager initialized for user: {self.user['username']}")
+        # print("data: ", self.user)
         self.user = User(
-            user_id=self.user["user_id"],
+            user_id=str(self.user["_id"]),
             username=self.user["username"],
             password=self.user["password"],
             email=self.user["email"],
@@ -47,7 +52,7 @@ class UserManager:
         # logic to update user info in the database can be added here
 
         self.db.get_table("users").update_one(
-            {"user_id": self.user.user_id},
+            {"_id": self.user.user_id},
             {"$set": data}
         )
         

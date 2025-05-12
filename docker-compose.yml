@@ -2,6 +2,9 @@ version: '3.8'
 
 services:
   backend_api:
+    # tty: true
+    # stdin_open: true
+
     build:
       context: ./backend_api
     container_name: backend_api
@@ -9,6 +12,7 @@ services:
       - "5000:5000"
     environment:
       MONGO_URI: mongodb://root:pass123@mongo:27017
+      SECRET_KEY: admin_s3cret_key
     depends_on:
       - mongo
     networks:
