@@ -1,0 +1,46 @@
+-- login:
+
+curl -X POST http://localhost:5000/login \
+  -H "Content-Type: application/json" \
+  -c cookies.txt \
+  -d '{"username": "admin", "password": "admin123"}'
+
+-- check profile:
+
+curl -X GET http://localhost:5000/user/profile \
+  -b cookies.txt
+
+
+-- update_profile:
+curl -X PUT http://localhost:5000/user/update_profile \
+  -H "Content-Type: application/json" \
+  -b cookies.txt \
+  -d '{"email": "newemail@example.com", "username": "admin01"}'
+
+-- add user: (admin required)
+
+curl -X POST http://localhost:5000/admin/users/add \
+  -H "Content-Type: application/json" \
+  -b cookies.txt \
+  -d '{
+    "username": "amongus",
+    "password": "anhbaolon",
+    "email": "amongus@example.com",
+    "role": "user"
+  }'
+
+-- del user: (admin required)
+curl -X DELETE http://localhost:5000/admin/users/remove/USER_ID \
+  -b cookies.txt
+
+
+-- update role: (admin required)
+curl -X PUT http://localhost:5000/admin/users/update_role/USER_ID \
+  -H "Content-Type: application/json" \
+  -b cookies.txt \
+  -d '{"new_role": "admin"}'
+
+
+-- logout:
+curl -X POST http://localhost:5000/auth/logout \
+  -b cookies.txt

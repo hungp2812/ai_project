@@ -52,11 +52,12 @@ class UserManager:
         # logic to update user info in the database can be added here
 
         self.db.get_table("users").update_one(
-            {"_id": self.user.user_id},
+            {"_id": ObjectId(self.user.user_id)},
             {"$set": data}
         )
+
+        return "User information updated successfully."
         
-    
     def face_recognition(self):
         # Placeholder for face recognition logic
         # This would typically involve loading the image and running a face recognition algorithm
@@ -90,7 +91,6 @@ class UserManager:
         # Placeholder for image retrieval logic
         # This would typically involve accessing an image file and returning it
         return "Image retrieved successfully"
-    
         
     def __repr__(self):
         return f"UserManager(user={self.user})"

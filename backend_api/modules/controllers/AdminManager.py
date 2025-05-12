@@ -1,5 +1,7 @@
 from User import User, UserRole
 from UserManager import UserManager
+from werkzeug.security import generate_password_hash
+from bson import ObjectId
 
 class AdminManager(UserManager):
     """
@@ -17,24 +19,38 @@ class AdminManager(UserManager):
         Adds a new user to the system.
         """
         # Logic to add a new user (e.g., insert into database)
-        self.db.get_table("users").insert_one(data)
-        return "User added successfully."
+        if "password" not in data or "username" not in data or "email" not in data:
+            raise ValueError("Missing required fields: username, email, or password")
+    
+        data["password"] = generate_password_hash(data["password"])
+        data["role"] = data.get("role", UserRole.USER.value)
+        inserted = self.db.get_table("users").insert_one(data)
+        return {"message": "User added successfully", "user_id": str(inserted.inserted_id)}
 
     def remove_user(self, user_id: str):
         """
-        Removes a user from the system by their user ID.
+        Removes a user from the system by their ObjectId.
         """
-        # Logic to remove a user (e.g., delete from database)
-        self.db.get_table("users").delete_one({"user_id": user_id})
-        return "User removed successfully."
+        if not ObjectId.is_valid(user_id):
+            raise ValueError("Invalid user ID format")
+
+        result = self.db.get_table("users").delete_one({"_id": ObjectId(user_id)})
+        if result.deleted_count == 0:
+            return {"error": "User not found or already deleted"}
+        return {"message": "User removed successfully"}
 
     def update_user_role(self, user_id: str, new_role: UserRole):
         """
         Updates the role of an existing user.
         """
-        # Logic to update user role (e.g., update in database)
-        self.db.get_table("users").update_one(
-            {"user_id": user_id},
+        if not ObjectId.is_valid(user_id):
+            raise ValueError("Invalid user ID format")
+
+        result = self.db.get_table("users").update_one(
+            {"_id": ObjectId(user_id)},
             {"$set": {"role": new_role.value}}
         )
-        return "User role updated successfully."
+        
+        if result.matched_count == 0:
+            return {"error": "User not found"}
+        return {"message": "User role updated successfully"}

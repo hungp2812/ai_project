@@ -5,7 +5,15 @@ from modules.utils.decorators import admin_required
 from modules.controllers.AdminManager import AdminManager
 
 admin_bp = Blueprint("admin", __name__)
-admin_bp.before_request(admin_required)
+# admin_bp.before_request(admin_required)
+
+# Middleware to check if the user is an admin
+
+@admin_bp.before_request
+def check_admin():
+    if session.get("role") != "admin":
+        return jsonify({"error": "Admin access required"}), 403
+
 
 @admin_bp.route("/users/add", methods=["POST"])
 def add_user():
