@@ -1,6 +1,6 @@
 from User import User, UserRole
 from modules.utils.db_connector import dbConnector
-# from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash
 from bson import ObjectId
 # from cv2 import VideoCapture, imshow
 
@@ -50,6 +50,10 @@ class UserManager:
         if email:
             self.user.email = email
         # logic to update user info in the database can be added here
+
+        # Update the user information in the database
+        if "password" in data:
+            data["password"] = generate_password_hash(data["password"])
 
         self.db.get_table("users").update_one(
             {"_id": ObjectId(self.user.user_id)},

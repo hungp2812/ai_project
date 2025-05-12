@@ -48,9 +48,9 @@ class AdminManager(UserManager):
 
         result = self.db.get_table("users").update_one(
             {"_id": ObjectId(user_id)},
-            {"$set": {"role": new_role.value}}
+            {"$set": {"role": str(new_role)}}
         )
-        
+
         if result.matched_count == 0:
             return {"error": "User not found"}
         return {"message": "User role updated successfully"}

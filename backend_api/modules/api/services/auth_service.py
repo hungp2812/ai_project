@@ -18,7 +18,7 @@ def login_user(user):
     Store user information in the session after successful authentication.
     """
     session["user_id"] = str(user["_id"])
-    session["role"] = user.get("UserRole", "user")
+    session["role"] = user.get("role", "user")
 
 def logout_user():
     """

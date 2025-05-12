@@ -42,5 +42,12 @@ curl -X PUT http://localhost:5000/admin/users/update_role/USER_ID \
 
 
 -- logout:
-curl -X POST http://localhost:5000/auth/logout \
+curl -X GET http://localhost:5000/logout \
   -b cookies.txt
+
+
+-- check db:
+docker exec -it mongo mongosh -u root -p pass123
+
+use your_database_name
+db.users.find().pretty()
