@@ -1,4 +1,7 @@
+Tất cả các api hiện tại và ví dụ cách gọi
 -- login:
+
+POST /login
 
 curl -X POST http://localhost:5000/login \
   -H "Content-Type: application/json" \
@@ -7,17 +10,23 @@ curl -X POST http://localhost:5000/login \
 
 -- check profile:
 
+GET user/profile
+
 curl -X GET http://localhost:5000/user/profile \
   -b cookies.txt
 
-
 -- update_profile:
+
+PUT user/update_profile
+
 curl -X PUT http://localhost:5000/user/update_profile \
   -H "Content-Type: application/json" \
   -b cookies.txt \
   -d '{"email": "newemail@example.com", "username": "admin01"}'
 
 -- add user: (admin required)
+
+POST admin/users/add/
 
 curl -X POST http://localhost:5000/admin/users/add \
   -H "Content-Type: application/json" \
@@ -30,11 +39,18 @@ curl -X POST http://localhost:5000/admin/users/add \
   }'
 
 -- del user: (admin required)
+
+DELETE admin/users/remove/[USER_ID]
+
+curl -
 curl -X DELETE http://localhost:5000/admin/users/remove/USER_ID \
   -b cookies.txt
 
 
 -- update role: (admin required)
+
+PUT admin/users/update_role/[USER_ID]
+
 curl -X PUT http://localhost:5000/admin/users/update_role/USER_ID \
   -H "Content-Type: application/json" \
   -b cookies.txt \
@@ -42,12 +58,18 @@ curl -X PUT http://localhost:5000/admin/users/update_role/USER_ID \
 
 
 -- logout:
+
+GET /logout
 curl -X GET http://localhost:5000/logout \
   -b cookies.txt
 
 
+
+Kiểm tra database hiện tại
+
 -- check db:
+
 docker exec -it mongo mongosh -u root -p pass123
 
-use your_database_name
+use ai_project
 db.users.find().pretty()

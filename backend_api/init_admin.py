@@ -1,4 +1,3 @@
-from pymongo import MongoClient
 from werkzeug.security import generate_password_hash
 from modules.utils.db_connector import dbConnector
 import os
@@ -18,10 +17,9 @@ def create_admin_user():
 
     admin_user = {
         "username": "admin",
-        "password": generate_password_hash("admin123"),  # 👈 bạn có thể đổi password này
+        "password": generate_password_hash("admin123"),
         "email": "admin@example.com",
-        "role": "admin",  # 👈 bạn có thể đổi role này
-        # "UserRole": "admin"
+        "role": "admin", 
     }
 
     users.insert_one(admin_user)
