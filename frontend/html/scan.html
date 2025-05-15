@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI SkinSight</title>
+  <meta name="description" content="Facial skin analysis application"/>
+  <meta name="author" content="AI SkinSight"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+  <style>
+  .scan-flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .scan-left {
+    flex: 8;
+    min-width: 500px;
+  }
+
+  .scan-right {
+    flex: 2;
+    min-width: 250px;
+    max-width: 350px;
+  }
+
+  .result-images,
+  .result-logs {
+    display: none;
+  }
+
+  .result-images img {
+    width: 100%;
+    margin-bottom: 10px;
+    border-radius: 10px;
+  }
+
+  .result-logs {
+    white-space: pre-wrap;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+  }
+
+  .result-images.active,
+  .result-logs.active {
+    display: block;
+  }
+
+    .result-item {
+        display: none;
+    }
+    .result-item.active {
+        display: block;
+    }
+
+    #uploadedPreview {
+        max-width: 100%;
+        max-height: 300px; /* hoặc giá trị bạn muốn */
+        display: block;
+        margin-top: 10px;
+        border-radius: 10px;
+        object-fit: contain;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #clearUploadBtn {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 6px;
+    }
+
+</style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Navigation -->
+    <header>
+      <nav>
+        <div class="logo-text"><a href="homepage.html">AI SkinSight</a></div>
+        <ul class="nav-links">
+          <li><a href="homepage.html">Homepage</a></li>
+          <li><a href="homepage.html">About us</a></li>
+          <li><a href="homepage.html">Contact</a></li>
+        </ul>
+        <div class="account-menu">
+          <button class="accountBtn">Login</button>
+          <ul class="dropdown">
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="history.html">History</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="#" id="logoutLink">Logout</a></li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Main section -->
+    <main>
+      <section class="dashboard">
+        <h2>Welcome, <span id="userName"></span></h2>
+
+        <div class="scan-flex-container">
+          <!-- Left side: Capture / Upload -->
+          <div class="scan-left">
+            <div class="scan-container" id="webcam-section">
+              <h3>AI-powered age spot detection (Capture mode)</h3>
+              <div class="image1-container">
+                <video id="webcam" autoplay playsinline></video>
+                <canvas id="canvas" class="hidden"></canvas>
+                <img id="capturedImage" class="hidden"/>
+              </div>
+              <div class="control-buttons">
+                <button id="activate-webcam" class="btn-primary">Activate your webcam</button>
+                <button id="captureBtn" class="btn-primary hidden">Capture</button>
+              </div>
+            </div>
+
+            <div class="scan-container hidden" id="upload-section">
+              <h3>AI-powered age spot detection (Upload mode)</h3>
+              <div class="image2-container">
+                <input type="file" id="imageUpload" accept="image/*" class="btn-primary"/>
+                <button id="clearUploadBtn" class="btn-secondary hidden" style="margin-left: 10px;">Clear</button>
+                <img id="uploadedPreview" class="hidden"/>
+              </div>
+            </div>
+
+            <div class="action-buttons">
+              <button id="upload-option" class="btn-primary">Switch to Upload</button>
+              <button id="capture-option" class="btn-primary hidden">Switch to Capture</button>
+              <button id="startScanBtn" class="btn-primary">Start scanning</button>
+            </div>
+          </div>
+
+            <!-- Right side: Results -->
+          <div class="scan-right scan-container" id="result-section">
+            <h3>Analysis result</h3>
+              <div class="result-images active" id="resultImages">
+                <div class="result-item" id="resultItem1">
+                  <p class="caption">Acne Detection</p>
+                  <img src="" id="resultImage1" alt="Result 1"/>
+                </div>
+                <div class="result-item" id="resultItem2">
+                  <p class="caption">Facial wrinkles Detection</p>
+                  <img src="" id="resultImage2" alt="Result 2"/>
+                </div>
+                <div class="result-item" id="resultItem3">
+                  <p class="caption">Age Spot Highlight</p>
+                  <img src="" id="resultImage3" alt="Result 3"/>
+                </div>
+              </div>
+
+              <div class="result-logs" id="resultLogs">
+                <!-- Nội dung log phân tích sẽ được cập nhật bằng JavaScript -->
+                <p id="logContent">No analysis yet.</p>
+              </div>
+              <button id="toggleLogBtn" class="btn-primary toggle-log-btn">Show Log</button>
+          </div>
+
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../javascript/app.js"></script>
+</body>
+</html>

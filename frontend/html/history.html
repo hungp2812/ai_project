@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Scan History</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .session {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background-color: #f9f9f9;
+      position: relative;
+      transition: background-color 0.2s;
+    }
+    .session:hover {
+      background-color: #f1f1f1;
+    }
+    .session-header {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+    }
+    .session-results {
+      display: none;
+      margin-top: 0.5rem;
+      padding-left: 1rem;
+    }
+    .result-item {
+      padding: 0.25rem 0;
+    }
+    .delete-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: #ff4d4d;
+      border: none;
+      border-radius: 5px;
+      padding: 0.3rem 0.6rem;
+      color: white;
+      cursor: pointer;
+    }
+    .delete-btn:hover {
+      background-color: #e60000;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <nav>
+        <div class="logo-text"><a href="homepage.html">AI SkinSight</a></div>
+        <ul class="nav-links">
+          <li><a href="homepage.html">Homepage</a></li>
+          <li><a href="homepage.html">About us</a></li>
+          <li><a href="homepage.html">Contact</a></li>
+        </ul>
+        <div class="account-menu">
+          <button class="accountBtn">Login</button>
+          <ul class="dropdown">
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="history.html">History</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="#" id="logoutLink">Logout</a></li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <h2 style="text-align:center; margin: 1rem 0;">Scan History</h2>
+      <div id="historyContainer" style="max-width: 700px; margin: 0 auto;"></div>
+    </main>
+  </div>
+<script src="../javascript/app.js"></script>
+  <script>
+    const historyContainer = document.getElementById("historyContainer");
+
+    function loadHistory() {
+      historyContainer.innerHTML = "";
+      const rawHistory = JSON.parse(localStorage.getItem("scanHistory")) || [];
+
+      const sessions = [];
+      for (let i = 0; i < rawHistory.length; i += 7) {
+        const session = rawHistory.slice(i, i + 7);
+        if (session.length === 7) {
+          sessions.push({ index: i, data: session });
+        }
+      }
+
+      if (sessions.length === 0) {
+        historyContainer.innerHTML = "<p style='text-align:center;'>No scan history found.</p>";
+        return;
+      }
+
+      sessions.forEach((sessionObj, sessionIndex) => {
+        const { index, data: session } = sessionObj;
+
+        const sessionDiv = document.createElement("div");
+        sessionDiv.className = "session";
+
+        const sessionHeader = document.createElement("div");
+        sessionHeader.className = "session-header";
+        sessionHeader.textContent = `Scan session ${sessions.length - sessionIndex} (started at ${session[6].time})`;
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "delete-btn";
+        deleteBtn.textContent = "🗑 Delete";
+        deleteBtn.addEventListener("click", () => {
+          const confirmDelete = confirm("Are you sure you want to delete this scan session?");
+          if (confirmDelete) {
+            const history = JSON.parse(localStorage.getItem("scanHistory")) || [];
+            history.splice(index, 7); // Xoá 7 phần tử từ vị trí index
+            localStorage.setItem("scanHistory", JSON.stringify(history));
+            loadHistory(); // reload lại giao diện
+          }
+        });
+
+        const sessionResults = document.createElement("div");
+        sessionResults.className = "session-results";
+
+        session.forEach(result => {
+          const resultItem = document.createElement("div");
+          resultItem.className = "result-item";
+          resultItem.textContent = `→ ${result.time} | Hydration: ${result.hydration}%, Oil: ${result.oil}%, Wrinkle: ${result.wrinkle}%, UV: ${result.uv}%`;
+          sessionResults.appendChild(resultItem);
+        });
+
+        sessionDiv.appendChild(sessionHeader);
+        sessionDiv.appendChild(deleteBtn);
+        sessionDiv.appendChild(sessionResults);
+
+        sessionHeader.addEventListener("click", () => {
+          sessionResults.style.display = sessionResults.style.display === "block" ? "none" : "block";
+        });
+
+        historyContainer.appendChild(sessionDiv);
+      });
+    }
+
+    loadHistory();
+  </script>
+</body>
+</html>

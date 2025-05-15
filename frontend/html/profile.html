@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Profile</title>
+  <link rel="stylesheet" href="../css/profile.css" />
+</head>
+<body>
+  <div class="admin-container">
+    <aside class="sidebar">
+      <h2>Dashboard</h2>
+      <ul class="tab-menu">
+        <li class="tab-item active" data-tab="profile">Account</li>
+        <!-- Tab Manage Users chỉ dành cho admin -->
+        <li class="tab-item" id="manageTab" data-tab="manage" style="display:none;">Manage Users</li>
+      </ul>
+    </aside>
+
+    <main class="main-content">
+      <!-- Thông tin người dùng -->
+      <section id="profile" class="tab-content active">
+        <h2>Account Information</h2>
+        <p><strong>Email:</strong> <span id="emailDisplay"></span></p>
+        <p><strong>Password:</strong> ••••••••</p>
+        <button>Update Info</button>
+      </section>
+
+      <!-- Quản lý tài khoản (admin) -->
+      <section id="manage" class="tab-content">
+        <h2>User Management</h2>
+        <button id="addUserBtn">Add User</button>
+        <table>
+          <thead>
+            <tr><th>Email</th><th>Role</th><th>Action</th></tr>
+          </thead>
+          <tbody id="userTableBody">
+            <!-- dữ liệu user sẽ được load động -->
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script src="../javascript/profile.js"></script>
+</body>
+</html>
