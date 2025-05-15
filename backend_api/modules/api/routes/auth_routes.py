@@ -17,10 +17,10 @@ def register():
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
-    if not data or "username" not in data or "password" not in data:
+    if not data or "email" not in data or "password" not in data or not "role" in data:
         return jsonify({"error": "Missing credentials"}), 400
 
-    user = authenticate_user(data["username"], data["password"])
+    user = authenticate_user(data["email"], data["password"], data["role"])
     if not user:
         return jsonify({"error": "Invalid credentials"}), 401
 

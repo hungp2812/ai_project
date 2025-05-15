@@ -30,6 +30,17 @@ services:
     networks:
       - ai_network
 
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:80"  # NGINX chạy cổng 80 nội bộ, ánh xạ ra ngoài là 3000
+    depends_on:
+      - backend_api
+    networks:
+      - ai_network
+
 networks:
   ai_network:
 volumes:
