@@ -14,6 +14,18 @@ def check_admin():
     if session.get("role") != "admin":
         return jsonify({"error": "Admin access required"}), 403
 
+@admin_bp.route("/users", methods=["GET"])
+def get_users():
+    """
+    Get a list of all users in the system.
+    """
+    admin_manager = AdminManager(user_id=session.get("user_id"))
+
+    users = admin_manager.get_all_users()
+    if not users:
+        return jsonify({"error": "No users found"}), 404
+
+    return jsonify(users), 200
 
 @admin_bp.route("/users/add", methods=["POST"])
 def add_user():

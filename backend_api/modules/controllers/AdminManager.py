@@ -13,6 +13,13 @@ class AdminManager(UserManager):
         super().__init__(user_id)
         if self.user.role != UserRole.ADMIN:
             raise ValueError("Only admins can use AdminManager.")
+        
+    def get_all_users(self):
+        """
+        Retrieves all users from the system.
+        """
+        users = self.db.get_table("users").find()
+        return [User(**user).to_dict() for user in users]
 
     def add_user(self, data: dict):
         """
