@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Profile</title>
-  <link rel="stylesheet" href="../css/profile.css" />
+  <link rel="stylesheet" href="../CSS/profile.css" />
 </head>
 <body>
   <div class="admin-container">
@@ -21,8 +21,8 @@
       <section id="profile" class="tab-content active">
         <h2>Account Information</h2>
         <p><strong>Email:</strong> <span id="emailDisplay"></span></p>
+        <p><strong>User name:</strong> <span id="userName"></span></p>
         <p><strong>Password:</strong> ••••••••</p>
-        <button>Update Info</button>
       </section>
 
       <!-- Quản lý tài khoản (admin) -->
@@ -41,6 +41,32 @@
     </main>
   </div>
 
-  <script src="../javascript/profile.js"></script>
+  <!-- Modal Add User -->
+<div id="addUserModal" class="modal">
+  <div class="modal-content">
+    <h3>Add New User</h3>
+    <label>Email:</label>
+    <input type="email" id="newUserEmail" /><br>
+    <label>Role:</label>
+    <select id="newUserRole">
+      <option value="user">User</option>
+      <option value="admin">Admin</option>
+    </select><br>
+    <button id="confirmAddUser">Add</button>
+    <button id="cancelAddUser">Cancel</button>
+  </div>
+</div>
+
+<!-- Modal xác nhận xóa -->
+<div id="deleteConfirmModal" class="modal">
+  <div class="modal-content">
+    <h3>Xác nhận xóa</h3>
+    <p>Bạn có chắc chắn muốn xóa người dùng này không?</p>
+    <button id="confirmDeleteBtn">Yes</button>
+    <button id="cancelDeleteBtn">No</button>
+  </div>
+</div>
+
+  <script src="../JavaScript/profile.js"></script>
 </body>
 </html>
