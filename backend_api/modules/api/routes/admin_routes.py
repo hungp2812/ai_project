@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from bson import ObjectId
 
-from modules.utils.decorators import admin_required
+# from modules.utils.decorators import admin_required
 from modules.controllers.AdminManager import AdminManager
 
 admin_bp = Blueprint("admin", __name__)
