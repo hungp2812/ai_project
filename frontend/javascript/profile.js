@@ -114,33 +114,46 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// Load danh sách người dùng
 function loadUserTable() {
   const userTable = document.getElementById("userTableBody");
-  const users = [
-    { email: "user1@example.com", role: "user" },
-    { email: "admin@example.com", role: "admin" },
-  ];
 
-  userTable.innerHTML = "";
-  users.forEach(u => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${u.email}</td>
-      <td>
-        <select class="roleSelect">
-          <option value="user" ${u.role === "user" ? "selected" : ""}>User</option>
-          <option value="admin" ${u.role === "admin" ? "selected" : ""}>Admin</option>
-        </select>
-      </td>
-      <td><button class="deleteUserBtn">Delete</button></td>
-    `;
-    userTable.appendChild(row);
+  fetch("http://localhost:5000/admin/users", {
+    credentials: "include" // Gửi cookie kèm theo (cần thiết nếu dùng session Flask)
+  })
+    .then(response => {
+      if (!response.ok) throw new Error("Failed to fetch users");
+      return response.json();
+    })
+    .then(users => {
+      userTable.innerHTML = ""; // Clear cũ
 
-    row.querySelector(".deleteUserBtn").addEventListener("click", () => {
-      showDeleteModal(row);
+      users.forEach(u => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${u.email}</td>
+          <td>
+            <select class="roleSelect">
+              <option value="user" ${u.role === "user" ? "selected" : ""}>User</option>
+              <option value="admin" ${u.role === "admin" ? "selected" : ""}>Admin</option>
+            </select>
+          </td>
+          <td><button class="deleteUserBtn">Delete</button></td>
+        `;
+        userTable.appendChild(row);
+
+        row.querySelector(".deleteUserBtn").addEventListener("click", () => {
+          showDeleteModal(u._id); // dùng ID thật để gửi request xóa
+        });
+
+        row.querySelector(".roleSelect").addEventListener("change", (e) => {
+          const newRole = e.target.value;
+          updateUserRole(u._id, newRole);
+        });
+      });
+    })
+    .catch(error => {
+      console.error("Error fetching users:", error);
     });
-  });
 }
 
 // Modal xác nhận xóa user
