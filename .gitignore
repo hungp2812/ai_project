@@ -1,5 +1,6 @@
 **/__pycache__
 cookie.txt
+cookies.txt
 backend_ai/acne/acne_detection_model.keras
 backend_ai/darkspot/dark_spot_detector1.pth
 backend_ai/wrinkle/wrinkle_model.keras

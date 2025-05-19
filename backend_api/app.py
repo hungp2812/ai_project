@@ -8,7 +8,7 @@ import os
 app = Flask(__name__)
 
 app.secret_key = os.environ.get("SECRET_KEY", "admin_s3cret_key")
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
 # Register Blueprints
 app.register_blueprint(auth_bp)

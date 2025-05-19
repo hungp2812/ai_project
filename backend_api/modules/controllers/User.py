@@ -15,6 +15,16 @@ class User:
         self.role = role
         self.latest_face_recognition = None  # Placeholder for face recognition data
 
+    def to_dict(self):
+        """Convert the User object to a dictionary."""
+        return {
+            "user_id": self.user_id,
+            "username": self.username,
+            "email": self.email,
+            "role": self.role.value,
+            "latest_face_recognition": self.latest_face_recognition
+        }
+
     def __repr__(self):
         return f"User(user_id={self.user_id}, username={self.username}, email={self.email})"
     
