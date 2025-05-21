@@ -1,2 +1,2 @@
-https://drive.google.com/uc?id=19y2NqSACK9uLkFpIs79hMHQszB05_eRw&export=download
-dark_spot_detector1.pth
+https://drive.google.com/file/d/1NxaMyYMQKPHTKwXd5K9V4VLST95Exjal/view?usp=drive_link
+dark_spot_detection_model.onnx

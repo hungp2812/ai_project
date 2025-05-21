@@ -5,12 +5,13 @@ import os
 import requests
 import numpy as np
 
-from person_detector import detect_and_crop
+from person_detector import detect_and_crop 
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "static"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# Các endpoint tương ứng 3 mô hình (chạy 3 app.py khác nhau)
 MODEL_ENDPOINTS = {
     "acne": "http://localhost:8001/predict",
     "wrinkle": "http://localhost:8002/predict",
@@ -31,19 +32,24 @@ def analyze():
     except Exception:
         return jsonify({"success": False, "error": "Invalid image"}), 400
 
+    # Kiểm tra có đúng 1 người, sau đó crop ảnh
     msg, cropped_np = detect_and_crop(image)
     if cropped_np is None:
         return jsonify({"success": False, "error": msg}), 400
 
-    # Convert cropped numpy array (RGB) to bytes JPEG
+    # Chuyển crop numpy -> bytes JPEG
     cropped_pil = Image.fromarray(cropped_np)
     img_bytes_io = io.BytesIO()
     cropped_pil.save(img_bytes_io, format="JPEG")
     img_bytes = img_bytes_io.getvalue()
 
+    # Hàm gọi model qua endpoint Flask riêng
     def call_model(endpoint, out_filename):
         files = {'file': ('image.jpg', img_bytes, 'image/jpeg')}
-        resp = requests.post(endpoint, files=files)
+        try:
+            resp = requests.post(endpoint, files=files, timeout=10)
+        except requests.exceptions.RequestException as e:
+            raise Exception(f"Cannot reach model at {endpoint}: {e}")
         if resp.status_code != 200:
             raise Exception(f"Model {endpoint} error: {resp.text}")
         out_path = os.path.join(UPLOAD_FOLDER, out_filename)
@@ -66,6 +72,7 @@ def analyze():
         "darkspot_image_url": f"/static/{darkspot_file}",
     })
 
+# Route phục vụ ảnh kết quả
 @app.route('/static/<path:filename>')
 def static_files(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)

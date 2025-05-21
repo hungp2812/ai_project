@@ -1,2 +1,2 @@
-https://drive.google.com/uc?id=1t1RqCMmHBG4C7DFF_A9iGCcpCDrL3vhF&export=download
-acne_detection_model.keras
+https://drive.google.com/file/d/1ZjBWmExApeKtcTueV-ubKjDk0K3_5Ksr/view?usp=drive_link
+acne_detection_model.onnx

@@ -1,2 +1,2 @@
-https://drive.google.com/uc?id=1kqK0Lbr2kKK75NKJlMMmFtrC5bx2R-Lk&export=download
-wrinkle_model.keras
+https://drive.google.com/file/d/1ITeHXzYmZeuz_WdSn9x86c1pvD5LJID8/view?usp=drive_link
+wrinkle_detection_model.onnx

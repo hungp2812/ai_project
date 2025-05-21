@@ -4,3 +4,5 @@ keras-cv
 numpy
 pillow
 opencv-python-headless
+ultralytics
+onnxruntime 

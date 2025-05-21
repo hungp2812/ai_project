@@ -1,44 +1,47 @@
 from flask import Flask, request, send_file
-from PIL import Image, ImageDraw
-import torch
-import torchvision.transforms as T
-from torchvision.models.detection import fasterrcnn_resnet50_fpn
-from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+from PIL import Image, ImageDraw, ImageFont
 import io
+import numpy as np
+import onnxruntime as ort
+import torchvision.transforms as T
 
 app = Flask(__name__)
 
-# Load model
-def get_model(num_classes):
-    model = fasterrcnn_resnet50_fpn(pretrained=False)
-    in_features = model.roi_heads.box_predictor.cls_score.in_features
-    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
-    return model
+onnx_session = ort.InferenceSession("dark_spot_detection_model.onnx")
 
-model = get_model(num_classes=2)
-model.load_state_dict(torch.load("dark_spot_detector1.pth", map_location="cpu"))
-model.eval()
-
-# Transform
+# Transform (PIL Image → Tensor → numpy)
 transform = T.Compose([
     T.ToTensor(),
 ])
+
+def preprocess(img):
+    # Chuyển ảnh PIL sang tensor 3xHxW, rồi sang numpy float32
+    img_tensor = transform(img)
+    return img_tensor.numpy()
 
 @app.route('/predict', methods=['POST'])
 def predict():
     file = request.files['file']
     img = Image.open(file.stream).convert("RGB")
-    img_tensor = transform(img).unsqueeze(0)
-
-    with torch.no_grad():
-        outputs = model(img_tensor)[0]
-
+    
+    # Preprocess
+    input_numpy = preprocess(img)
+    
+    # ort expects input name and numpy array
+    inputs = {onnx_session.get_inputs()[0].name: input_numpy}
+    
+    # Inference
+    boxes, labels, scores = onnx_session.run(None, inputs)
+    
     draw = ImageDraw.Draw(img)
-    for box, score in zip(outputs['boxes'], outputs['scores']):
+    font = ImageFont.load_default()
+    
+    # boxes, scores: numpy arrays; 
+    for box, score in zip(boxes, scores):
         if score > 0.5:
-            x1, y1, x2, y2 = box.tolist()
+            x1, y1, x2, y2 = box
             draw.rectangle([x1, y1, x2, y2], outline="red", width=3)
-            draw.text((x1, y1), f"{score:.2f}", fill="red")
+            draw.text((x1, y1), f"{score:.2f}", fill="red", font=font)
 
     img_bytes = io.BytesIO()
     img.save(img_bytes, format='JPEG')
