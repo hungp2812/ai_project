@@ -25,7 +25,13 @@ def login():
         return jsonify({"error": "Invalid credentials"}), 401
 
     login_user(user)
-    return jsonify({"message": "Logged in successfully"}), 200
+    return jsonify({
+        "message": "Logged in successfully",
+        "user_id": str(user["_id"]),
+        "username": user["username"],
+        "email": user["email"],
+        "role": user.get("role", "user"),
+    }), 200
 
 @auth_bp.route("/logout", methods=["GET"])
 def logout():
