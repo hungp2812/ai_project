@@ -19,9 +19,8 @@ document.addEventListener("DOMContentLoaded", () => {
     loginForm.addEventListener("submit", function (e) {
       e.preventDefault();
 
-      const email = document.getElementById("loginEmail").value.trim();
+      const username = document.getElementById("loginUsername").value.trim();
       const password = document.getElementById("loginPassword").value;
-      const type = document.getElementById("loginType").value;
 
       fetch("http://localhost:5000/login", {
         method: "POST",
@@ -30,16 +29,20 @@ document.addEventListener("DOMContentLoaded", () => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ 
-          email: email, 
+          username: username, 
           password: password, 
-          role: type 
         })
       })
       .then(response => response.json().then(data => ({ status: response.status, body: data })))
       .then(({ status, body }) => {
         if (status === 200) {
           sessionStorage.setItem("isLoggedIn", "true");
-          sessionStorage.setItem("loggedInUser", JSON.stringify({ username: email, type })); // Lưu thủ công
+          sessionStorage.setItem("loggedInUser", JSON.stringify({ 
+            user_id: body.user_id,
+            username: body.username,
+            email: body.email,
+            role: body.role
+          })); // Lưu thủ công
 
           alert("Đăng nhập thành công!");
           window.location.href = "homepage.html";

@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Nếu là admin, hiển thị tab quản lý người dùng
-  if (userData.type === "admin") {
+  if (userData.role === "admin") {
     document.getElementById("manageTab").style.display = "block";
     loadUserTable();
   }
