@@ -2,7 +2,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask import session
 from modules.utils.db_connector import dbConnector
 
-def authenticate_user(email: str, password: str, role: str):
+def authenticate_user(email: str, password: str):
     """
     Authenticate a user by checking their email and password against the database.
     Returns the user document if authentication is successful, otherwise returns None.
@@ -11,13 +11,7 @@ def authenticate_user(email: str, password: str, role: str):
     user = db.get_table("users").find_one({"email": email})
     
     if user and check_password_hash(user["password"], password):
-        # if role == "admin" and user.get("role") != "admin":
-        #     return None
-        # return user
-        if user.get("role") == role:
-            return user
-        else:
-            return None
+        return user
     return None
 
 def login_user(user):
