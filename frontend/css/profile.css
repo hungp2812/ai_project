@@ -70,7 +70,7 @@ body {
 
 /* Profile Section */
 #profile {
-  max-width: 500px;
+  max-width: 800px;
   background: #f7faff;
   border-radius: 12px;
   padding: 25px 30px;
@@ -95,6 +95,7 @@ body {
   border-radius: 6px;
   margin-top: 5px;
   margin-bottom: 15px;
+  font-size: large;
 }
 
 #profile input[type="password"] {
@@ -114,6 +115,7 @@ button {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-size: large;
 }
 
 button:hover {
@@ -233,7 +235,7 @@ input[type="text"], input[type="email"], input[type="password"] {
 .edit-container {
   background-color: #ffffff;
   padding: 24px;
-  max-width: 400px;
+  max-width: 700px;
   margin: 20px auto;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -260,6 +262,7 @@ input[type="text"], input[type="email"], input[type="password"] {
   border: 1px solid #ccc;
   border-radius: 8px;
   transition: border 0.3s;
+  font-size: large;
 }
 
 .edit-container input:focus {
@@ -433,4 +436,96 @@ table button:hover {
 #cancelDeleteBtn {
   background-color: #ccc;
   color: black;
+}
+
+/* Overlay modal */
+.modal1 {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Nội dung modal đẹp hơn */
+.modal-content1 {
+  background-color: #ffffff;
+  padding: 35px 35px;
+  border-radius: 16px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease-in-out;
+  text-align: center;
+}
+
+.modal-content1 h3 {
+  font-size: 22px;
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.modal-content1 p {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* Input style */
+.modal-content1 input[type="password"] {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+}
+
+.modal-content1 input[type="password"]:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+
+/* Nút bấm */
+.modal-content1 button {
+  padding: 10px 20px;
+  margin: 6px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#confirmPasswordBtn {
+  background-color: #3498db;
+  color: white;
+}
+
+#confirmPasswordBtn:hover {
+  background-color: #2980b9;
+}
+
+#cancelPasswordBtn {
+  background-color: #bdc3c7;
+  color: #2c3e50;
+}
+
+#cancelPasswordBtn:hover {
+  background-color: #95a5a6;
+}
+
+/* Lỗi sai mật khẩu */
+#passwordError {
+  color: #e74c3c;
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  display: none;
 }
