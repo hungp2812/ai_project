@@ -235,41 +235,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// Load danh sách người dùng
-function loadUserTable() {
-  const userTable = document.getElementById("userTableBody");
-  const users = [
-    { email: "user1@example.com", role: "user" },
-    { email: "admin@example.com", role: "admin" },
-  ];
-
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${u.email}</td>
-      <td>
-        <select class="roleSelect">
-          <option value="user" ${u.role === "user" ? "selected" : ""}>User</option>
-          <option value="admin" ${u.role === "admin" ? "selected" : ""}>Admin</option>
-        </select>
-      </td>
-      <td><button class="deleteUserBtn">Delete</button></td>
-    `;
-    userTable.appendChild(row);
-
-    row.querySelector(".deleteUserBtn").addEventListener("click", () => {
-      showDeleteModal(row);
-    });
-    document.getElementById("userTableBody").appendChild(row);
-
-    // Gắn sự kiện xóa với xác nhận
-    row.querySelector(".deleteUserBtn").addEventListener("click", () => {
-      showDeleteModal(row);
-    });
-
-    modal.style.display = "none";
-  });
-});
-
 function loadUserTable() {
   const userTable = document.getElementById("userTableBody");
 
