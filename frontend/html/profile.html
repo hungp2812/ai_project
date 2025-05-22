@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Profile</title>
-  <link rel="stylesheet" href="../css/profile.css" />
+  <link rel="stylesheet" href="../CSS/profile.css" />
 </head>
 <body>
   <div class="admin-container">
@@ -67,6 +67,18 @@
     <p>Bạn có chắc chắn muốn xóa người dùng này không?</p>
     <button id="confirmDeleteBtn">Yes</button>
     <button id="cancelDeleteBtn">No</button>
+  </div>
+</div>
+
+<!-- Modal xác nhận mật khẩu -->
+<div id="passwordConfirmModal" class="modal1">
+  <div class="modal-content1">
+    <h3>Xác nhận mật khẩu</h3>
+    <p>Vui lòng nhập mật khẩu để tiếp tục thay đổi thông tin.</p>
+    <input type="password" id="confirmPasswordInput" placeholder="Password" />
+    <button id="confirmPasswordBtn">Xác nhận</button>
+    <button id="cancelPasswordBtn">Hủy</button>
+    <p id="passwordError" style="color:red; display:none;">Mật khẩu không đúng!</p>
   </div>
 </div>
 
