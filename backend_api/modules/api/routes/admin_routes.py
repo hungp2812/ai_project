@@ -13,6 +13,9 @@ admin_bp = Blueprint("admin", __name__)
 def check_admin():
     print("Session role:", session.get("role"))
 
+    if request.method == "OPTIONS":
+        return  # Cho phép CORS preflight
+
     if session.get("role") != "admin":
         return jsonify({"error": "Admin access required"}), 403
 
@@ -29,8 +32,11 @@ def get_users():
 
     return jsonify(users), 200
 
-@admin_bp.route("/users/add", methods=["POST"])
+@admin_bp.route("/users/add", methods=["POST", "OPTIONS"])
 def add_user():
+    if request.method == "OPTIONS":
+        # Preflight CORS request — chỉ cần trả 200
+        return '', 200
     """
     Add a new user to the system.
     """

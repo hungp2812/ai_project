@@ -2,45 +2,45 @@ version: '3.8'
 
 services:
 
-  acne_service:
-    build:
-      context: ./backend_ai/acne
-    container_name: acne_service
-    ports:
-      - "8001:8001"
-    networks:
-      - ai_network
+  # acne_service:
+  #   build:
+  #     context: ./backend_ai/acne
+  #   container_name: acne_service
+  #   ports:
+  #     - "8001:8001"
+  #   networks:
+  #     - ai_network
 
-  wrinkle_service:
-    build:
-      context: ./backend_ai/wrinkle
-    container_name: wrinkle_service
-    ports:
-      - "8002:8002"
-    networks:
-      - ai_network
+  # wrinkle_service:
+  #   build:
+  #     context: ./backend_ai/wrinkle
+  #   container_name: wrinkle_service
+  #   ports:
+  #     - "8002:8002"
+  #   networks:
+  #     - ai_network
 
-  darkspot_service:
-    build:
-      context: ./backend_ai/darkspot
-    container_name: darkspot_service
-    ports:
-      - "8003:8003"
-    networks:
-      - ai_network
+  # darkspot_service:
+  #   build:
+  #     context: ./backend_ai/darkspot
+  #   container_name: darkspot_service
+  #   ports:
+  #     - "8003:8003"
+  #   networks:
+  #     - ai_network
 
-  backend_ai:
-    build:
-      context: ./backend_ai/main_app
-    container_name: backend_ai
-    ports:
-      - "8000:8000"
-    depends_on:
-      - acne_service
-      - wrinkle_service
-      - darkspot_service
-    networks:
-      - ai_network
+  # backend_ai:
+  #   build:
+  #     context: ./backend_ai/main_app
+  #   container_name: backend_ai
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     - acne_service
+  #     - wrinkle_service
+  #     - darkspot_service
+  #   networks:
+  #     - ai_network
 
   backend_api:
     # tty: true
@@ -79,7 +79,7 @@ services:
       - "3000:80"  # NGINX chạy cổng 80 nội bộ, ánh xạ ra ngoài là 3000
     depends_on:
       - backend_api
-      - backend_ai
+      # - backend_ai
     networks:
       - ai_network
 
