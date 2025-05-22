@@ -17,15 +17,21 @@ def register():
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
-    if not data or "email" not in data or "password" not in data or not "role" in data:
+    if not data or "username" not in data or "password" not in data:
         return jsonify({"error": "Missing credentials"}), 400
 
-    user = authenticate_user(data["email"], data["password"], data["role"])
+    user = authenticate_user(data["username"], data["password"])
     if not user:
         return jsonify({"error": "Invalid credentials"}), 401
 
     login_user(user)
-    return jsonify({"message": "Logged in successfully"}), 200
+    return jsonify({
+        "message": "Logged in successfully",
+        "user_id": str(user["_id"]),
+        "username": user["username"],
+        "email": user["email"],
+        "role": user.get("role", "user"),
+    }), 200
 
 @auth_bp.route("/logout", methods=["GET"])
 def logout():

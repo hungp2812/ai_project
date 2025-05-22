@@ -155,8 +155,6 @@ function loadUserTable() {
     { email: "admin@example.com", role: "admin" },
   ];
 
-  userTable.innerHTML = "";
-  users.forEach(u => {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${u.email}</td>
@@ -173,7 +171,57 @@ function loadUserTable() {
     row.querySelector(".deleteUserBtn").addEventListener("click", () => {
       showDeleteModal(row);
     });
+    document.getElementById("userTableBody").appendChild(row);
+
+    // Gắn sự kiện xóa với xác nhận
+    row.querySelector(".deleteUserBtn").addEventListener("click", () => {
+      showDeleteModal(row);
+    });
+
+    modal.style.display = "none";
   });
+});
+
+function loadUserTable() {
+  const userTable = document.getElementById("userTableBody");
+
+  fetch("http://localhost:5000/admin/users", {
+    credentials: "include" // Gửi cookie kèm theo (cần thiết nếu dùng session Flask)
+  })
+    .then(response => {
+      if (!response.ok) throw new Error("Failed to fetch users");
+      return response.json();
+    })
+    .then(users => {
+      userTable.innerHTML = ""; // Clear cũ
+
+      users.forEach(u => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${u.email}</td>
+          <td>
+            <select class="roleSelect">
+              <option value="user" ${u.role === "user" ? "selected" : ""}>User</option>
+              <option value="admin" ${u.role === "admin" ? "selected" : ""}>Admin</option>
+            </select>
+          </td>
+          <td><button class="deleteUserBtn">Delete</button></td>
+        `;
+        userTable.appendChild(row);
+
+        row.querySelector(".deleteUserBtn").addEventListener("click", () => {
+          showDeleteModal(u._id); // dùng ID thật để gửi request xóa
+        });
+
+        row.querySelector(".roleSelect").addEventListener("change", (e) => {
+          const newRole = e.target.value;
+          updateUserRole(u._id, newRole);
+        });
+      });
+    })
+    .catch(error => {
+      console.error("Error fetching users:", error);
+    });
 }
 
 // Modal xác nhận xóa user

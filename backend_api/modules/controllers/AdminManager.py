@@ -19,7 +19,17 @@ class AdminManager(UserManager):
         Retrieves all users from the system.
         """
         users = self.db.get_table("users").find()
-        return [User(**user).to_dict() for user in users]
+        return [
+            User(
+                user_id=str(user["_id"]),  # lấy từ _id
+                username=user["username"],
+                password=user.get("password"),
+                email=user["email"],
+                role=UserRole(user["role"]),  # đảm bảo đúng Enum
+                latest_face_recognition=user.get("latest_face_recognition")
+            ).to_dict()
+            for user in users
+        ]
 
     def add_user(self, data: dict):
         """

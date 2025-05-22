@@ -1,0 +1,8 @@
+flask
+tensorflow==2.18.0
+keras-cv
+numpy
+pillow
+opencv-python-headless
+ultralytics
+onnxruntime 

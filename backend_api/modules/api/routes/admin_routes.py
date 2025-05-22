@@ -11,6 +11,8 @@ admin_bp = Blueprint("admin", __name__)
 
 @admin_bp.before_request
 def check_admin():
+    print("Session role:", session.get("role"))
+
     if session.get("role") != "admin":
         return jsonify({"error": "Admin access required"}), 403
 
