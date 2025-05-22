@@ -6,7 +6,7 @@ POST /login
 curl -X POST http://localhost:5000/login \
   -H "Content-Type: application/json" \
   -c cookies.txt \
-  -d '{"username": "admin", "password": "admin123"}'
+  -d '{"email": "admin@example.com", "password": "admin123", "role": "admin"}'
 
 -- check profile:
 

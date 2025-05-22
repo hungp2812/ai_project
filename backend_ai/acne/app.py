@@ -1,6 +1,5 @@
 from flask import Flask, request, send_file, jsonify
-import tensorflow as tf
-import keras_cv
+import onnxruntime
 import numpy as np
 import cv2
 from PIL import Image
@@ -8,59 +7,97 @@ import io
 
 app = Flask(__name__)
 
-# Load model
-model_path = 'acne_detection_model.keras'
-model = tf.keras.models.load_model(model_path)
+onnx_model_path = "acne_detection_model.onnx"
+session = onnxruntime.InferenceSession(onnx_model_path, providers=['CPUExecutionProvider'])
 
-# Class mapping
-class_mapping = {0: 'Acne'}
+# Class mapping (nếu chỉ 1 class: acne)
+class_mapping = {0: "Acne"}
 
-# Hàm xử lý ảnh đầu vào
-def preprocess_image(image):
-    image = np.array(image.convert("RGB"))
-    resized_img = tf.image.resize(image, (640, 640))
-    resized_img = tf.cast(resized_img, dtype=tf.float32)
-    return resized_img
+# Resize ảnh và chuẩn hóa cho YOLOv8
+def preprocess_image(image: Image.Image):
+    img = image.convert("RGB")
+    img = np.array(img)
 
-# Hàm dự đoán và vẽ bounding box
-def predict_and_plot(image):
-    preprocessed = preprocess_image(image)
-    batch = tf.expand_dims(preprocessed, axis=0)
+    h0, w0 = img.shape[:2]  # original height and width
+    r = 640 / max(h0, w0)  # scale ratio
+    new_w, new_h = int(w0 * r), int(h0 * r)
 
-    y_pred = model.predict(batch, verbose=0)
-    y_pred = keras_cv.bounding_box.to_dense(y_pred)
+    # Resize ảnh theo tỉ lệ giữ aspect ratio
+    resized = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
 
-    pred_boxes = y_pred["boxes"][0]
-    pred_classes = y_pred["classes"][0]
+    # Tạo ảnh nền đen 640x640 và đặt ảnh resized vào góc trên trái
+    canvas = np.zeros((640, 640, 3), dtype=np.uint8)
+    canvas[:new_h, :new_w, :] = resized
+
+    # Chuyển BGR->RGB nếu cần, normalize 0..1, transpose (C,H,W)
+    input_img = canvas.astype(np.float32) / 255.0
+    input_img = np.transpose(input_img, (2, 0, 1))  # CHW
+    input_img = np.expand_dims(input_img, axis=0)  # batch dim
+
+    return input_img, r, 0, 0  # r là tỉ lệ resize, 0,0 vì ảnh đặt ở góc (left, top)
+
+# Xử lý output model (transpose và lọc theo confidence)
+def postprocess(outputs, r, left, top, conf_threshold=0.25):
+    preds = outputs[0]  # shape (1, 5, 8400)
+    preds = np.transpose(preds, (0, 2, 1))  # -> (1, 8400, 5)
+    preds = preds[0]  # (8400, 5)
+
+    confs = preds[:, 4]
+    mask = confs > conf_threshold
+    preds = preds[mask]
+
+    boxes = preds[:, :4]
+    scores = preds[:, 4]
+    class_ids = np.zeros(len(scores), dtype=int)  # 1 class
+
+    final_boxes = []
+    for box in boxes:
+        x_c, y_c, w, h = box
+        x_c -= left
+        y_c -= top
+        x1 = (x_c - w / 2) / r
+        y1 = (y_c - h / 2) / r
+        x2 = (x_c + w / 2) / r
+        y2 = (y_c + h / 2) / r
+        final_boxes.append([int(x1), int(y1), int(x2), int(y2)])
+
+    return final_boxes, scores, class_ids
+
+def predict_and_plot(image: Image.Image):
+    input_img, r, left, top = preprocess_image(image)
+    ort_inputs = {session.get_inputs()[0].name: input_img}
+    outputs = session.run(None, ort_inputs)
+
+    boxes, scores, class_ids = postprocess(outputs, r, left, top)
 
     img_np = np.array(image.convert("RGB"))
 
-    for box, cls in zip(pred_boxes, pred_classes):
-        x1, y1, x2, y2 = [int(v) for v in box]
-        label = class_mapping.get(int(cls), "Unknown")
+    for box, score, cls_id in zip(boxes, scores, class_ids):
+        x1, y1, x2, y2 = box
+        label = f"{class_mapping.get(cls_id, 'Unknown')} {score:.2f}"
 
-        # Vẽ bounding box và label
         cv2.rectangle(img_np, (x1, y1), (x2, y2), (0, 255, 255), 2)
-        cv2.putText(img_np, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+        cv2.putText(img_np, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX,
+                    0.7, (0, 255, 255), 2)
 
-    result_image = Image.fromarray(img_np)
-    return result_image
+    result_img = Image.fromarray(img_np)
+    return result_img
 
-@app.route('/predict', methods=['POST'])
+@app.route("/predict", methods=["POST"])
 def predict():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
 
-    file = request.files['file']
+    file = request.files["file"]
     image = Image.open(file.stream)
 
-    result = predict_and_plot(image)
+    result_image = predict_and_plot(image)
 
     img_bytes = io.BytesIO()
-    result.save(img_bytes, format='JPEG')
+    result_image.save(img_bytes, format="JPEG")
     img_bytes.seek(0)
 
-    return send_file(img_bytes, mimetype='image/jpeg')
+    return send_file(img_bytes, mimetype="image/jpeg")
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8001)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8001)
