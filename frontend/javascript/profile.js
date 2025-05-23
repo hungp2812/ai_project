@@ -65,42 +65,83 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordModal.style.display = "flex";
 
     const handleConfirm = () => {
-      if (passwordInput.value === userData.password) {
-        passwordModal.style.display = "none";
+      const enteredPassword = passwordInput.value;
 
-        profileSection.innerHTML = `
-          <div class="edit-container">
-            <h2>Edit Account</h2>
-            <label>Email:</label>
-            <p>${userData.email}</p>
-            <label>User name:</label>
-            <input type="text" id="editUserName" value="${userData.name}" />
-            <label>New password:</label>
-            <input type="password" id="editPass" value="${userData.password}" />
-            <button id="saveBtn">Save</button>
-          </div>
-        `;
-
-        document.getElementById("saveBtn").addEventListener("click", () => {
-          const newPass = document.getElementById("editPass").value;
-          const newUserName = document.getElementById("editUserName").value;
-
-          if (!newPass || !newUserName) {
-            alert("Vui lòng nhập đầy đủ thông tin.");
-            return;
+      fetch("http://localhost:5000/user/verify_password", {
+        method: "POST",
+        credentials: "include", // Gửi cookie kèm theo (cần thiết nếu dùng session Flask)
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ password: enteredPassword })
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Mật khẩu không đúng");
           }
+          return response.json();
+        })
+        .then(data => {
+          // Ẩn modal và hiển thị form chỉnh sửa
+          passwordModal.style.display = "none";
 
-          userData.password = newPass;
-          userData.name = newUserName;
-          sessionStorage.setItem("loggedInUser", JSON.stringify(userData));
-          alert("Cập nhật thành công!");
-          location.reload();
+          profileSection.innerHTML = `
+            <div class="edit-container">
+              <h2>Edit Account</h2>
+              <label>Email:</label>
+              <p>${userData.email}</p>
+              <label>User name:</label>
+              <input type="text" id="editUserName" value="${userData.username}" />
+              <label>New password:</label>
+              <input type="password" id="editPass" value="" />
+              <button id="saveBtn">Save</button>
+            </div>
+          `;
+
+          document.getElementById("saveBtn").addEventListener("click", () => {
+            const newPass = document.getElementById("editPass").value;
+            const newUserName = document.getElementById("editUserName").value;
+
+            if (!newPass || !newUserName) {
+              alert("Vui lòng nhập đầy đủ thông tin.");
+              return;
+            }
+
+            // Gửi yêu cầu cập nhật thông tin người dùng
+            fetch("http://localhost:5000/user/update_profile", {
+              method: "POST",
+              credentials: "include", // Gửi cookie kèm theo (cần thiết nếu dùng session Flask)
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                password: newPass,
+                username: newUserName
+              })
+            })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error("Failed to update user data");
+                }
+                return response.json();
+              })  
+              .catch(error => {
+                console.error("Error updating user data:", error);
+                alert("Có lỗi xảy ra khi cập nhật thông tin người dùng.");
+              });
+            // Cập nhật thông tin người dùng trong sessionStorage
+            userData.username = newUserName;
+            sessionStorage.setItem("loggedInUser", JSON.stringify(userData));
+            alert("Cập nhật thành công!");
+            location.reload();
+          });
+
+          cleanupListeners();
+        })
+        .catch(error => {
+          passwordError.style.display = "block";
+          console.error("Lỗi xác thực:", error);
         });
-
-        cleanupListeners();
-      } else {
-        passwordError.style.display = "block";
-      }
     };
 
     const handleCancel = () => {
