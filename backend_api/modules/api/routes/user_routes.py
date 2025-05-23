@@ -19,6 +19,24 @@ def get_profile():
 
     return jsonify(profile), 200
 
+
+@user_bp.route("/verify_password", methods=["POST"])
+def verify_password():
+    """
+    Verify the password of the logged-in user.
+    """
+    user_manager = UserManager(user_id=session.get("user_id"))
+
+    data = request.get_json()
+    if not data or "password" not in data:
+        return jsonify({"error": "Missing password"}), 400
+
+    is_valid = user_manager.verify_password(data["password"])
+    if not is_valid:
+        return jsonify({"error": "Invalid password"}), 401
+
+    return jsonify({"message": "Password verified successfully"}), 200  
+
 @user_bp.route("/update_profile", methods=["PUT"])
 def update_profile():
     """
