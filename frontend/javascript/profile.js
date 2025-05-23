@@ -304,7 +304,7 @@ function loadUserTable() {
         userTable.appendChild(row);
 
         row.querySelector(".deleteUserBtn").addEventListener("click", () => {
-          showDeleteModal(u._id); // dùng ID thật để gửi request xóa
+          showDeleteModal(u._id, row); // dùng ID thật để gửi request xóa
         });
 
         row.querySelector(".roleSelect").addEventListener("change", (e) => {
@@ -319,7 +319,7 @@ function loadUserTable() {
 }
 
 // Modal xác nhận xóa user
-function showDeleteModal(rowToDelete) {
+function showDeleteModal(userId, rowToDelete) {
   const deleteModal = document.getElementById("deleteConfirmModal");
   deleteModal.style.display = "flex";
 
@@ -327,8 +327,22 @@ function showDeleteModal(rowToDelete) {
   const cancelBtn = document.getElementById("cancelDeleteBtn");
 
   const handleConfirm = () => {
-    rowToDelete.remove();
-    closeModal();
+    fetch(`http://localhost:5000/admin/users/remove/${userId}`, {
+      method: "DELETE",
+      credentials: "include"
+    })
+      .then(response => {
+        if (!response.ok) throw new Error("Xóa thất bại");
+        alert("Xóa người dùng thành công!");
+        rowToDelete.remove();
+      })
+      .catch(error => {
+        console.error("Lỗi khi xóa người dùng:", error);
+        alert("Không thể xóa người dùng. Vui lòng thử lại.");
+      })
+      .finally(() => {
+        closeModal();
+      });
   };
 
   const closeModal = () => {
@@ -339,4 +353,27 @@ function showDeleteModal(rowToDelete) {
 
   confirmBtn.addEventListener("click", handleConfirm);
   cancelBtn.addEventListener("click", closeModal);
+}
+
+// xác nhận cập nhật role của user 
+function updateUserRole(userId, newRole) {
+  fetch(`http://localhost:5000/admin/users/update_role/${userId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    credentials: "include", // Gửi cookie kèm theo (quan trọng nếu dùng session Flask)
+    body: JSON.stringify({ new_role: newRole })
+  })
+    .then(response => {
+      if (!response.ok) throw new Error("Không thể cập nhật vai trò");
+      return response.json();
+    })
+    .then(data => {
+      alert("Cập nhật vai trò thành công!");
+    })
+    .catch(error => {
+      console.error("Lỗi cập nhật vai trò:", error);
+      alert("Cập nhật vai trò thất bại. Vui lòng thử lại.");
+    });
 }

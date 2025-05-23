@@ -58,6 +58,64 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// Request API đăng ký
+document.addEventListener("DOMContentLoaded", () => {
+  // Lấy phần tử form đăng ký
+  const registerForm = document.getElementById("registerForm");
+
+  registerForm.addEventListener("submit", async (event) => {
+    event.preventDefault(); // Ngăn form submit mặc định (reload page)
+
+    // Lấy dữ liệu từ form
+    const name = document.getElementById("registerName").value.trim();
+    const email = document.getElementById("registerEmail").value.trim();
+    const password = document.getElementById("registerPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    const role = document.getElementById("loginType").value;
+
+    // Kiểm tra mật khẩu xác nhận
+    if (password !== confirmPassword) {
+      alert("Mật khẩu xác nhận không khớp!");
+      return;
+    }
+
+    // Chuẩn bị dữ liệu gửi API
+    // Theo ví dụ API bạn cho, API cần username, password, email
+    // Mình dùng 'name' làm username nếu bạn muốn, hoặc bạn có thể thêm trường username riêng
+    const data = {
+      username: name,
+      password: password,
+      email: email,
+      role: role // nếu backend hỗ trợ role, còn không thì bỏ dòng này
+    };
+
+    try {
+      const response = await fetch("http://localhost:5000/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data),
+        credentials: "include" // Nếu backend dùng session/cookie
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Đăng ký thất bại");
+      }
+
+      const result = await response.json();
+      alert("Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.");
+      // Có thể chuyển hướng sang trang login
+      window.location.href = "login.html";
+
+    } catch (error) {
+      console.error("Lỗi đăng ký:", error);
+      alert("Lỗi đăng ký: " + error.message);
+    }
+  });
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   const accountMenu = document.querySelector('.account-menu');
   const accountBtn  = accountMenu.querySelector('.accountBtn');
