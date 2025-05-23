@@ -42,6 +42,7 @@ def register_user(username: str, password: str, email: str):
     user_id = db.get_table("users").insert_one({
         "username": username,
         "password": generate_password_hash(password),
-        "email": email
+        "email": email,
+        "role": "user"
     }).inserted_id
     return user_id
