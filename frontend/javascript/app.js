@@ -178,6 +178,15 @@ uploadOptionBtn.addEventListener('click', () => {
     uploadSection.classList.remove('hidden');
     uploadOptionBtn.classList.add('hidden');
     captureOptionBtn.classList.remove('hidden');
+
+    if (video.srcObject) {
+        currentStream = video.srcObject;
+        const tracks = currentStream.getTracks();
+        tracks.forEach(track => track.stop());  // Tắt từng track
+        video.srcObject = null;  // Dừng phát video
+    }
+    
+    startScanBtn.classList.remove("hidden");
 });
 
 captureOptionBtn.addEventListener('click', () => {
@@ -265,120 +274,104 @@ const MODEL_URL = './models';
 // LOGIC xử lý việc quét mặt thông qua gọi API đến BACKEND
 Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-])
-.then(() => {
+]).then(() => {
   console.log("Models loaded.");
   startScanBtn.addEventListener("click", () => {
     startScanBtn.disabled = true;
     startScanBtn.textContent = "Analyzing...";
 
-    const socket = io("http://localhost:8000");
-    socket.on("connect", () => {
-      console.log("[SocketIO] Connected", socket.id);
-      socket.emit("start_scan");
+    // Kiểm tra nếu là chế độ upload
+    if (!uploadSection.classList.contains("hidden")) {
+      const uploadedImageSrc = uploadedPreview.src;
 
-      // Lắng nghe kết quả phân tích từ backend
-      socket.on("prediction", ({ model, result }) => {
-        console.log("[SocketIO] Received prediction from model:", model);
-
-        if (model === "acne") {
-          document.getElementById("resultImage1").src = result.image;
-          document.getElementById("resultItem1").classList.add("active");
-        } else if (model === "wrinkle") {
-          document.getElementById("resultImage2").src = result.image;
-          document.getElementById("resultItem2").classList.add("active");
-        } else if (model === "darkspot") {
-          document.getElementById("resultImage3").src = result.image;
-          document.getElementById("resultItem3").classList.add("active");
-        }
-
-        // Ghi log kết quả phân tích
-        const log = document.getElementById("logContent");
-        log.innerHTML += `<p><strong>${model}</strong>: ${result.message || 'Processed'}</p>`;
-      });
-
-      // Khi 1 model đã xử lý xong
-      socket.on("done", ({model, results}) => {
-        const log = document.getElementById("logContent");
-        log.innerHTML += <p style="color: green;"><strong>${model}</strong> analysis complete ✅</p>;
-      });
-
-      //Nếu có lỗi
-      socket.on("error", ({message}) => {
-        console.error("[SocketIO] Error:", message);
-        const log = document.getElementById("logContent");
-        log.innerHTML += <p style="color:red;"><strong>Error:</strong> ${message}</p>;
-      })
-
-      // Kiểm tra đang ở chế độ upload
-      if (!uploadSection.classList.contains("hidden")) {
-        const uploadedImageSrc = uploadedPreview.src;
-
-        if (!uploadedImageSrc || uploadedImageSrc === "") {
-          alert("Please upload an image first!");
-          return;
-        }
-        console.log("Sending uploaded image to backend...");
-        socket.emit("image", { image: uploadedImageSrc });
-      } else {
-        canvas.classList.remove("hidden");
-
-        // Đảm bảo canvas khớp kích thước
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const displaySize = { width: video.videoWidth, height: video.videoHeight };
-        faceapi.matchDimensions(canvas, displaySize);
-
-        let sendInterval = 1000; // gửi ảnh về backend mỗi 1 giây nếu phát hiện mặt
-        let lastSent = 0;
-
-        // Bắt đầu quét liên tục
-        console.log("Starting face detection...");
-        setInterval(async () => {
-          const detections = await faceapi.detectAllFaces(
-            video,
-            new faceapi.TinyFaceDetectorOptions()
-          );
-          const resized = faceapi.resizeResults(detections, displaySize);
-          const context = canvas.getContext("2d");
-          context.clearRect(0, 0, canvas.width, canvas.height);
-
-          if (detections.length > 0) {
-            console.log("Face detected:", detections);
-          }
-          faceapi.draw.drawDetections(canvas, resized);
-
-          const now = Date.now();
-          if (detections.length > 0 && now - lastSent > sendInterval) {
-            const face = detections[0].box;  // Lấy bounding box đầu tiên
-            const x = face.x;
-            const y = face.y;
-            const width = face.width;
-            const height = face.height;
-
-            // Tạo một canvas tạm để crop phần khuôn mặt
-            const faceCanvas = document.createElement("canvas");
-            faceCanvas.width = width;
-            faceCanvas.height = height;
-            const faceCtx = faceCanvas.getContext("2d");
-
-            // Vẽ phần khuôn mặt vào canvas tạm
-            faceCtx.drawImage(video, x, y, width, height, 0, 0, width, height);
-        
-            // Chuyển thành base64
-            const croppedImage = faceCanvas.toDataURL("image/jpeg");
-
-            // Gửi qua socket
-            socket.emit("image", { image: croppedImage });
-            console.log("[SocketIO] Sent cropped face image");
-
-            lastSent = now;
-          }
-        }, 100);
+      if (!uploadedImageSrc || uploadedImageSrc === "") {
+        alert("Please upload an image first!");
+        return;
       }
-    });
+
+      console.log("Sending uploaded image to backend...");
+      sendImageToBackend(uploadedImageSrc);
+    } else {
+      canvas.classList.remove("hidden");
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const displaySize = { width: video.videoWidth, height: video.videoHeight };
+      faceapi.matchDimensions(canvas, displaySize);
+
+      let sendInterval = 1000;
+      let lastSent = 0;
+
+      console.log("Starting face detection...");
+      setInterval(async () => {
+        const detections = await faceapi.detectAllFaces(
+          video,
+          new faceapi.TinyFaceDetectorOptions()
+        );
+        const resized = faceapi.resizeResults(detections, displaySize);
+        const context = canvas.getContext("2d");
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        faceapi.draw.drawDetections(canvas, resized);
+
+        const now = Date.now();
+        if (detections.length > 0 && now - lastSent > sendInterval) {
+          const face = detections[0].box;
+          const x = face.x, y = face.y, width = face.width, height = face.height;
+
+          const faceCanvas = document.createElement("canvas");
+          faceCanvas.width = width;
+          faceCanvas.height = height;
+          const faceCtx = faceCanvas.getContext("2d");
+          faceCtx.drawImage(video, x, y, width, height, 0, 0, width, height);
+
+          const croppedImage = faceCanvas.toDataURL("image/jpeg");
+          console.log("[HTTP] Sending cropped face to /analyze...");
+          sendImageToBackend(croppedImage);
+          lastSent = now;
+        }
+      }, 100);
+    }
   });
 });
+
+async function sendImageToBackend(base64Image) {
+  const log = document.getElementById("logContent");
+  log.innerHTML += `<p><strong>Sending image to /analyze...</strong></p>`;
+
+  try {
+    const response = await fetch("/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ image: base64Image })
+    });
+
+    const data = await response.json();
+    console.log("Received response from backend:", data);
+
+    ["acne", "wrinkle", "darkspot"].forEach((model, index) => {
+      const result = data[model];
+      if (result && result.success) {
+        document.getElementById(`resultImage${index + 1}`).src = `data:image/jpeg;base64,${result.image}`;
+        document.getElementById(`resultItem${index + 1}`).classList.add("active");
+
+        log.innerHTML += `<p><strong>${model}</strong>: Processed ✅</p>`;
+        if (result.meta) {
+          Object.entries(result.meta).forEach(([k, v]) => {
+            log.innerHTML += `<p>${k}: ${v}</p>`;
+          });
+        }
+      } else {
+        log.innerHTML += `<p style="color:red;"><strong>${model} error:</strong> ${result?.error || "Unknown error"}</p>`;
+      }
+    });
+  } catch (err) {
+    console.error("Error sending image to backend:", err);
+    log.innerHTML += `<p style="color:red;"><strong>Request failed:</strong> ${err.message}</p>`;
+  }
+}
 
 window.addEventListener("DOMContentLoaded", () => {
   // Tất cả code JS bên dưới được đảm bảo chạy khi DOM đã load xong
@@ -423,5 +416,7 @@ window.addEventListener("DOMContentLoaded", () => {
     uploadedPreview.src = "";
     uploadedPreview.classList.add("hidden");
     clearUploadBtn.classList.add("hidden");
+    startScanBtn.disabled = false;
+    startScanBtn.textContent = "Start scanning";
   });
 });
