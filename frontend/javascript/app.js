@@ -288,6 +288,7 @@ Promise.all([
       // Lắng nghe kết quả phân tích từ backend
       socket.on("prediction", ({ model, result }) => {
         console.log("[SocketIO] Received prediction from model:", model);
+        console.log("Prediction result:", result);
 
         if (model === "acne") {
           document.getElementById("resultImage1").src = result.image;
@@ -299,20 +300,20 @@ Promise.all([
 
         // Ghi log kết quả phân tích
         const log = document.getElementById("logContent");
-        log.innerHTML += <p><strong>${model}</strong>: ${result.message || 'Processed'}</p>;
+        log.innerHTML += `<p><strong>${model}</strong>: ${result.message || 'Processed'}</p>`;
       });
 
       // Khi 1 model đã xử lý xong
       socket.on("done", ({model, results}) => {
         const log = document.getElementById("logContent");
-        log.innerHTML += <p style="color: green;"><strong>${model}</strong> analysis complete ✅</p>;
+        log.innerHTML += `<p style="color: green;"><strong>${model}</strong> analysis complete ✅</p>`;
       });
 
       //Nếu có lỗi
       socket.on("error", ({message}) => {
         console.error("[SocketIO] Error:", message);
         const log = document.getElementById("logContent");
-        log.innerHTML += <p style="color:red;"><strong>Error:</strong> ${message}</p>;
+        log.innerHTML += `<p style="color:red;"><strong>Error:</strong> ${message}</p>`;
       })
     });
 
