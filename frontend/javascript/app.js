@@ -284,7 +284,6 @@ Promise.all([
     if (!uploadSection.classList.contains("hidden")) {
       const uploadedImageSrc = uploadedPreview.src;
 
-
       if (!uploadedImageSrc || uploadedImageSrc === "") {
         alert("Please upload an image first!");
         return;
