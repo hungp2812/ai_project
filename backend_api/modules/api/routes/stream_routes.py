@@ -14,9 +14,9 @@ SUCCESS_THRESHOLD = 3
 active_sessions = {}
 
 stream_bp = Blueprint("stream", __name__)
-# socketio = SocketIO(cors_allowed_origins="*")
+socketio = None  # Sẽ được gán trong register_socket_events
 
-# Hàm gửi ảnh đến model và nhận về ảnh đã xử lý (binary -> base64)
+# Gửi ảnh đến model và nhận ảnh xử lý (dạng base64)
 async def fetch_model_prediction(session, url, image_b64):
     try:
         header, b64data = image_b64.split(",") if "," in image_b64 else ("", image_b64)
@@ -30,7 +30,6 @@ async def fetch_model_prediction(session, url, image_b64):
                 processed_bytes = await response.read()
                 processed_b64 = base64.b64encode(processed_bytes).decode("utf-8")
 
-                # Lấy metadata từ header
                 box_count = int(response.headers.get("X-Box-Count", "0"))
                 has_wrinkle = response.headers.get("X-Has-Wrinkle", "false").lower() == "true"
 
@@ -46,7 +45,7 @@ async def fetch_model_prediction(session, url, image_b64):
         print(f"Error fetching model prediction: {e}")
         return {"success": False, "error": str(e)}
 
-# Xử lý ảnh và gửi prediction về frontend
+# Xử lý một ảnh được gửi từ client
 async def process_image(sid: str, image_b64: str):
     session_data = active_sessions.get(sid)
     if not session_data:
@@ -61,7 +60,6 @@ async def process_image(sid: str, image_b64: str):
 
         for model, response in zip(tasks.keys(), responses):
             if response and response.get("success"):
-                # Chỉ emit nếu có bất thường
                 box_count = response.get("box_count", 0)
                 has_wrinkle = response.get("has_wrinkle", False)
 
@@ -69,18 +67,28 @@ async def process_image(sid: str, image_b64: str):
                     session_data["counters"][model] += 1
                     session_data["results"][model].append(response)
 
-                    emit("prediction", {"model": model, "result": response}, to=sid)
+                    # Gửi prediction kèm ảnh
+                    emit("prediction", {
+                        "model": model,
+                        "image": response["image"],
+                        "box_count": box_count,
+                        "has_wrinkle": has_wrinkle,
+                        "count": session_data["counters"][model]
+                    }, to=sid)
 
-                    if session_data["counters"][model] >= SUCCESS_THRESHOLD:
+                    # Nếu model này chưa done và đủ threshold thì gửi done
+                    if session_data["counters"][model] >= SUCCESS_THRESHOLD and model not in session_data["done_models"]:
+                        session_data["done_models"].add(model)
                         emit("done", {
                             "model": model,
                             "results": session_data["results"][model]
                         }, to=sid)
-                        disconnect(sid)
-                        return
 
+        # Nếu tất cả models đã xong, thì disconnect
+        if len(session_data["done_models"]) == len(MODEL_URLS):
+            disconnect(sid)
 
-# Đăng ký sự kiện socket
+# Đăng ký socket events
 def register_socket_events(socketio_instance):
     global socketio
     socketio = socketio_instance
@@ -91,8 +99,9 @@ def register_socket_events(socketio_instance):
         print(f"[Socket] Client connected: {sid}")
         active_sessions[sid] = {
             "active": False,
-            "counters": {"acne": 0, "wrinkle": 0, "darkspot": 0},
-            "results": {"acne": [], "wrinkle": [], "darkspot": []}
+            "counters": {model: 0 for model in MODEL_URLS},
+            "results": {model: [] for model in MODEL_URLS},
+            "done_models": set()
         }
 
     @socketio.on("start_scan")
