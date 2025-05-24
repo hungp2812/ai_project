@@ -284,6 +284,36 @@ Promise.all([
     socket.on("connect", () => {
       console.log("[SocketIO] Connected", socket.id);
       socket.emit("start_scan");
+      
+      // Lắng nghe kết quả phân tích từ backend
+      socket.on("prediction", ({ model, result }) => {
+        console.log("[SocketIO] Received prediction from model:", model);
+
+        if (model === "acne") {
+          document.getElementById("resultImage1").src = result.image;
+        } else if (model === "wrinkle") {
+          document.getElementById("resultImage2").src = result.image;
+        } else if (model === "darkspot") {
+          document.getElementById("resultImage3").src = result.image;
+        }
+
+        // Ghi log kết quả phân tích
+        const log = document.getElementById("logContent");
+        log.innerHTML += <p><strong>${model}</strong>: ${result.message || 'Processed'}</p>;
+      });
+
+      // Khi 1 model đã xử lý xong
+      socket.on("done", ({model, results}) => {
+        const log = document.getElementById("logContent");
+        log.innerHTML += <p style="color: green;"><strong>${model}</strong> analysis complete ✅</p>;
+      });
+
+      //Nếu có lỗi
+      socket.on("error", ({message}) => {
+        console.error("[SocketIO] Error:", message);
+        const log = document.getElementById("logContent");
+        log.innerHTML += <p style="color:red;"><strong>Error:</strong> ${message}</p>;
+      })
     });
 
     let sendInterval = 1000; // gửi ảnh về backend mỗi 1 giây nếu phát hiện mặt
