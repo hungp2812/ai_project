@@ -193,12 +193,17 @@ const video = document.getElementById('webcam');
 const captureBtn = document.getElementById('captureBtn');
 const canvas = document.getElementById('canvas');
 const capturedImage = document.getElementById('capturedImage');
+const startScanBtn = document.getElementById("startScanBtn");
+const resultImages = document.getElementById("resultImages");
+const resultLogs = document.getElementById("resultLogs");
+const toggleBtn = document.getElementById("toggleLogBtn");
 
 activateBtn.addEventListener('click', async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    video.srcObject = stream;
-    captureBtn.classList.remove('hidden');
-    activateBtn.classList.add('hidden');
+  startScanBtn.classList.remove("hidden");
+  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  video.srcObject = stream;
+  captureBtn.classList.remove('hidden');
+  activateBtn.classList.add('hidden');
 });
 
 let hasCaptured = false;
@@ -241,24 +246,6 @@ imageUpload.addEventListener('change', (e) => {
     }
 });
 
-navigator.mediaDevices
-  .getUserMedia({
-    video: {
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
-      aspectRatio: 16 / 9
-    },
-    audio: false
-  })
-  .then(stream => {
-    const video = document.getElementById('webcam');
-    video.srcObject = stream;
-    video.play();
-  })
-  .catch(err => {
-    console.error("Failed to access webcam:", err);
-  });
-
 // Lấy phần tử span để hiển thị tên
 const userNameSpan = document.getElementById('userName');
 
@@ -271,12 +258,84 @@ if (loggedInUser && loggedInUser.name) {
   userNameSpan.textContent = 'Guest';
 }
 
-// giả lập in ra kết quả
+// === PHẦN GỌI API ĐẾN BACKEND CỦA MODEL, GỬI ẢNH QUÉT ĐƯỢC VỀ BACKEND
+// LOAD MODEL FACEAPI ĐỂ DETECT MẶT
+const MODEL_URL = './models';
+
+// LOGIC xử lý việc quét mặt thông qua gọi API đến BACKEND
+Promise.all([
+  faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+])
+.then(() => {
+  console.log("Models loaded.");
+  startScanBtn.addEventListener("click", () => {
+    console.log("Starting face detection...");
+    startScanBtn.disabled = true;
+    startScanBtn.textContent = "Analyzing...";
+    canvas.classList.remove("hidden");
+
+    // Đảm bảo canvas khớp kích thước
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const displaySize = { width: video.videoWidth, height: video.videoHeight };
+    faceapi.matchDimensions(canvas, displaySize);
+
+    const socket = io("http://localhost:8000");
+    socket.on("connect", () => {
+      console.log("[SocketIO] Connected", socket.id);
+      socket.emit("start_scan");
+    });
+
+    let sendInterval = 1000; // gửi ảnh về backend mỗi 1 giây nếu phát hiện mặt
+    let lastSent = 0;
+
+    // Bắt đầu quét liên tục
+    setInterval(async () => {
+      const detections = await faceapi.detectAllFaces(
+        video,
+        new faceapi.TinyFaceDetectorOptions()
+      );
+      const resized = faceapi.resizeResults(detections, displaySize);
+      const context = canvas.getContext("2d");
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (detections.length > 0) {
+        console.log("Face detected:", detections);
+      }
+      faceapi.draw.drawDetections(canvas, resized);
+
+      const now = Date.now();
+      if (detections.length > 0 && now - lastSent > sendInterval) {
+        const face = detections[0].box;  // Lấy bounding box đầu tiên
+        const x = face.x;
+        const y = face.y;
+        const width = face.width;
+        const height = face.height;
+
+        // Tạo một canvas tạm để crop phần khuôn mặt
+        const faceCanvas = document.createElement("canvas");
+        faceCanvas.width = width;
+        faceCanvas.height = height;
+        const faceCtx = faceCanvas.getContext("2d");
+
+        // Vẽ phần khuôn mặt vào canvas tạm
+        faceCtx.drawImage(video, x, y, width, height, 0, 0, width, height);
+        
+        // Chuyển thành base64
+        const croppedImage = faceCanvas.toDataURL("image/jpeg");
+
+        // Gửi qua socket
+        socket.emit("image", { image: croppedImage });
+        console.log("[SocketIO] Sent cropped face image");
+
+        lastSent = now;
+      }
+    }, 100);
+  });
+});
 
 window.addEventListener("DOMContentLoaded", () => {
   // Tất cả code JS bên dưới được đảm bảo chạy khi DOM đã load xong
-
-  const startScanBtn = document.getElementById("startScanBtn");
   const resultImages = document.getElementById("resultImages");
   const resultLogs = document.getElementById("resultLogs");
   const toggleBtn = document.getElementById("toggleLogBtn");
@@ -297,51 +356,16 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  startScanBtn.addEventListener("click", () => {
-    startScanBtn.disabled = true;
-    startScanBtn.textContent = "Analyzing...";
-
-    setTimeout(() => {
-      const analysisResults = {
-        image1: '../Pictures/acne.jpg',
-        image2: '../Pictures/acne.jpg',
-        image3: '../Pictures/acne.jpg',
-        log: 'Analysis complete! Detected acne, wrinkles, and age spots.'
-      };
-
-      document.getElementById("resultImage1").src = analysisResults.image1;
-      document.getElementById("resultImage2").src = analysisResults.image2;
-      document.getElementById("resultImage3").src = analysisResults.image3;
-
-      document.getElementById("logContent").textContent = analysisResults.log;
-
-      document.getElementById("resultItem1").classList.add("active");
-      document.getElementById("resultItem2").classList.add("active");
-      document.getElementById("resultItem3").classList.add("active");
-
-      resultImages.classList.add("active");
-      resultLogs.classList.remove("active");
-
-      toggleBtn.textContent = "Show Log";
-      isShowingLog = false;
-
-      startScanBtn.disabled = false;
-      startScanBtn.textContent = "Start scanning";
-    }, 2000);
-  });
-
   // Upload preview
-  const imageUploadInput = document.getElementById("imageUpload");
-  const uploadedPreview1 = document.getElementById("uploadedPreview");
   const clearUploadBtn = document.getElementById("clearUploadBtn");
 
-  imageUploadInput.addEventListener("change", function () {
+  imageUpload.addEventListener("change", function () {
     const file = this.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = function (e) {
-        uploadedPreview1.src = e.target.result;
-        uploadedPreview1.classList.remove("hidden");
+        uploadedPreview.src = e.target.result;
+        uploadedPreview.classList.remove("hidden");
         clearUploadBtn.classList.remove("hidden");
       };
       reader.readAsDataURL(file);
@@ -349,9 +373,9 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   clearUploadBtn.addEventListener("click", function () {
-    imageUploadInput.value = "";
-    uploadedPreview1.src = "";
-    uploadedPreview1.classList.add("hidden");
+    imageUpload.value = "";
+    uploadedPreview.src = "";
+    uploadedPreview.classList.add("hidden");
     clearUploadBtn.classList.add("hidden");
   });
 });

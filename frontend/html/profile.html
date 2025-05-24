@@ -4,8 +4,31 @@
   <meta charset="UTF-8" />
   <title>Profile</title>
   <link rel="stylesheet" href="../css/profile.css" />
+  <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body>
+<div class="app-container">
+<!-- Navigation -->
+    <header>
+      <nav>
+        <div class="logo-text"><a href="homepage.html">AI SkinSight</a></div>
+        <ul class="nav-links">
+          <li><a href="homepage.html">Homepage</a></li>
+          <li><a href="homepage.html">About us</a></li>
+          <li><a href="homepage.html">Contact</a></li>
+        </ul>
+        <div class="account-menu">
+          <button class="accountBtn">Login</button>
+          <ul class="dropdown">
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="history.html">History</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="#" id="logoutLink">Logout</a></li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+    
   <div class="admin-container">
     <aside class="sidebar">
       <h2>Dashboard</h2>
@@ -81,19 +104,7 @@
     <p id="passwordError" style="color:red; display:none;">Mật khẩu không đúng!</p>
   </div>
 </div>
-
-<!-- Modal xác nhận mật khẩu
-<div id="passwordConfirmModal" class="modal1">
-  <div class="modal-content1">
-    <h3>Xác nhận mật khẩu</h3>
-    <p>Vui lòng nhập mật khẩu để tiếp tục thay đổi thông tin.</p>
-    <input type="password" id="confirmPasswordInput" placeholder="Password" />
-    <button id="confirmPasswordBtn">Xác nhận</button>
-    <button id="cancelPasswordBtn">Hủy</button>
-    <p id="passwordError" style="color:red; display:none;">Mật khẩu không đúng!</p>
-  </div>
-</div> -->
-
+</div>
   <script src="../javascript/profile.js"></script>
 </body>
 </html>
