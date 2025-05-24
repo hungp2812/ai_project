@@ -261,8 +261,8 @@ const userNameSpan = document.getElementById('userName');
 // Lấy thông tin người dùng từ localStorage
 const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
 
-if (loggedInUser && loggedInUser.name) {
-  userNameSpan.textContent = loggedInUser.name;
+if (loggedInUser && loggedInUser.username) {
+  userNameSpan.textContent = loggedInUser.username;
 } else {
   userNameSpan.textContent = 'Guest';
 }
@@ -283,6 +283,7 @@ Promise.all([
     // Kiểm tra nếu là chế độ upload
     if (!uploadSection.classList.contains("hidden")) {
       const uploadedImageSrc = uploadedPreview.src;
+
 
       if (!uploadedImageSrc || uploadedImageSrc === "") {
         alert("Please upload an image first!");
