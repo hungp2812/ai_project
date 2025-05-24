@@ -420,3 +420,4 @@ window.addEventListener("DOMContentLoaded", () => {
     startScanBtn.textContent = "Start scanning";
   });
 });
+//
