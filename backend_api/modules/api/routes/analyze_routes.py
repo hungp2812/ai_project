@@ -49,12 +49,12 @@ async def run_model_requests(image_bytes):
     async with aiohttp.ClientSession() as session:
         tasks = {
             name: post_image(session, url, image_bytes)
-            for name, url in MODEL_ENDPOINTS.items()
+            for name, url in MODEL_URLS.items()
         }
         responses = await asyncio.gather(*tasks.values())
 
     result_dict = {}
-    for (model_name, (content, headers, status)) in zip(MODEL_ENDPOINTS.keys(), responses):
+    for (model_name, (content, headers, status)) in zip(MODEL_URLS.keys(), responses):
         if status == 200:
             img_b64 = base64.b64encode(content).decode("utf-8")
             meta = {}

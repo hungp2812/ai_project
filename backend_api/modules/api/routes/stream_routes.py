@@ -19,7 +19,6 @@ stream_bp = Blueprint("stream", __name__)
 # Hàm gửi ảnh đến model và nhận về ảnh đã xử lý (binary -> base64)
 async def fetch_model_prediction(session, url, image_b64):
     try:
-        # Tách base64 prefix nếu có
         header, b64data = image_b64.split(",") if "," in image_b64 else ("", image_b64)
         image_bytes = base64.b64decode(b64data)
 
@@ -30,9 +29,16 @@ async def fetch_model_prediction(session, url, image_b64):
             if response.status == 200:
                 processed_bytes = await response.read()
                 processed_b64 = base64.b64encode(processed_bytes).decode("utf-8")
+
+                # Lấy metadata từ header
+                box_count = int(response.headers.get("X-Box-Count", "0"))
+                has_wrinkle = response.headers.get("X-Has-Wrinkle", "false").lower() == "true"
+
                 return {
                     "success": True,
-                    "image": f"data:image/jpeg;base64,{processed_b64}"
+                    "image": f"data:image/jpeg;base64,{processed_b64}",
+                    "box_count": box_count,
+                    "has_wrinkle": has_wrinkle
                 }
             else:
                 return {"success": False, "error": f"Status {response.status}"}
@@ -55,18 +61,24 @@ async def process_image(sid: str, image_b64: str):
 
         for model, response in zip(tasks.keys(), responses):
             if response and response.get("success"):
-                session_data["counters"][model] += 1
-                session_data["results"][model].append(response)
+                # Chỉ emit nếu có bất thường
+                box_count = response.get("box_count", 0)
+                has_wrinkle = response.get("has_wrinkle", False)
 
-                emit("prediction", {"model": model, "result": response}, to=sid)
+                if box_count > 0 or has_wrinkle:
+                    session_data["counters"][model] += 1
+                    session_data["results"][model].append(response)
 
-                if session_data["counters"][model] >= SUCCESS_THRESHOLD:
-                    emit("done", {
-                        "model": model,
-                        "results": session_data["results"][model]
-                    }, to=sid)
-                    disconnect(sid)
-                    return
+                    emit("prediction", {"model": model, "result": response}, to=sid)
+
+                    if session_data["counters"][model] >= SUCCESS_THRESHOLD:
+                        emit("done", {
+                            "model": model,
+                            "results": session_data["results"][model]
+                        }, to=sid)
+                        disconnect(sid)
+                        return
+
 
 # Đăng ký sự kiện socket
 def register_socket_events(socketio_instance):
