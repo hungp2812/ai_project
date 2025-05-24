@@ -171,13 +171,11 @@ document.addEventListener('DOMContentLoaded', () => {
 const webcamSection = document.getElementById('webcam-section');
 const uploadSection = document.getElementById('upload-section');
 const uploadOptionBtn = document.getElementById('upload-option');
-const captureOptionBtn = document.getElementById('capture-option');
 
 uploadOptionBtn.addEventListener('click', () => {
     webcamSection.classList.add('hidden');
     uploadSection.classList.remove('hidden');
     uploadOptionBtn.classList.add('hidden');
-    captureOptionBtn.classList.remove('hidden');
 
     if (video.srcObject) {
         currentStream = video.srcObject;
@@ -189,19 +187,11 @@ uploadOptionBtn.addEventListener('click', () => {
     startScanBtn.classList.remove("hidden");
 });
 
-captureOptionBtn.addEventListener('click', () => {
-    uploadSection.classList.add('hidden');
-    webcamSection.classList.remove('hidden');
-    captureOptionBtn.classList.add('hidden');
-    uploadOptionBtn.classList.remove('hidden');
-});
-
 // Webcam activation
 const activateBtn = document.getElementById('activate-webcam');
 const video = document.getElementById('webcam');
-const captureBtn = document.getElementById('captureBtn');
+const stopScanBtn = document.getElementById('stopScanBtn');
 const canvas = document.getElementById('canvas');
-const capturedImage = document.getElementById('capturedImage');
 const startScanBtn = document.getElementById("startScanBtn");
 const resultImages = document.getElementById("resultImages");
 const resultLogs = document.getElementById("resultLogs");
@@ -211,32 +201,7 @@ activateBtn.addEventListener('click', async () => {
   startScanBtn.classList.remove("hidden");
   const stream = await navigator.mediaDevices.getUserMedia({ video: true });
   video.srcObject = stream;
-  captureBtn.classList.remove('hidden');
   activateBtn.classList.add('hidden');
-});
-
-let hasCaptured = false;
-
-captureBtn.addEventListener('click', () => {
-    if (!hasCaptured) {
-        // Capture the current webcam frame
-        const context = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const dataURL = canvas.toDataURL('image/png');
-        capturedImage.src = dataURL;
-        capturedImage.classList.remove('hidden');
-        video.classList.add('hidden');
-        captureBtn.textContent = 'Capture again';
-        hasCaptured = true;
-    } else {
-        // Reset to show webcam feed again
-        capturedImage.classList.add('hidden');
-        video.classList.remove('hidden');
-        captureBtn.textContent = 'Capture';
-        hasCaptured = false;
-    }
 });
 
 // Upload preview
@@ -271,6 +236,9 @@ if (loggedInUser && loggedInUser.username) {
 // LOAD MODEL FACEAPI ĐỂ DETECT MẶT
 const MODEL_URL = './models';
 
+let intervalId = null;
+let lastDetectedFace = null;
+
 // LOGIC xử lý việc quét mặt thông qua gọi API đến BACKEND
 Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
@@ -293,7 +261,7 @@ Promise.all([
       sendImageToBackend(uploadedImageSrc);
     } else {
       canvas.classList.remove("hidden");
-
+      stopScanBtn.classList.remove("hidden");
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const displaySize = { width: video.videoWidth, height: video.videoHeight };
@@ -307,7 +275,7 @@ Promise.all([
         let sendInterval = 1000;
         let lastSent = 0;
         // Bắt đầu quét liên tục
-        setInterval(async () => {
+        intervalId = setInterval(async () => {
           const detections = await faceapi.detectAllFaces(
             video,
             new faceapi.TinyFaceDetectorOptions()
@@ -316,40 +284,60 @@ Promise.all([
           const context = canvas.getContext("2d");
           context.clearRect(0, 0, canvas.width, canvas.height);
 
-          if (detections.length > 0) {
-            console.log("Face detected:", detections);
-          }
           faceapi.draw.drawDetections(canvas, resized);
+
           const now = Date.now();
-          if (detections.length > 0 && now - lastSent > sendInterval) {
-            const face = detections[0].box;  // Lấy bounding box đầu tiên
-            const x = face.x;
-            const y = face.y;
-            const width = face.width;
-            const height = face.height;
+          if (detections.length > 0) {
+            lastDetectedFace = detections[0].box;
 
-            // Tạo một canvas tạm để crop phần khuôn mặt
-            const faceCanvas = document.createElement("canvas");
-            faceCanvas.width = width;
-            faceCanvas.height = height;
-            const faceCtx = faceCanvas.getContext("2d");
+            if (now - lastSent > sendInterval) {
+              const { x, y, width, height } = lastDetectedFace;
 
-            // Vẽ phần khuôn mặt vào canvas tạm
-            faceCtx.drawImage(video, x, y, width, height, 0, 0, width, height);
-        
-            // Chuyển thành base64
-            const croppedImage = faceCanvas.toDataURL("image/jpeg");
+              const faceCanvas = document.createElement("canvas");
+              faceCanvas.width = width;
+              faceCanvas.height = height;
+              const faceCtx = faceCanvas.getContext("2d");
+              faceCtx.drawImage(video, x, y, width, height, 0, 0, width, height);
+              const croppedImage = faceCanvas.toDataURL("image/jpeg");
 
-            // Gửi qua socket
-            socket.emit("image", { image: croppedImage });
-            console.log("[SocketIO] Sent cropped face image");
+              socket.emit("image", { image: croppedImage });
+              console.log("[SocketIO] Sent cropped face image");
 
-            lastSent = now;
+              lastSent = now;
+            }
           }
         }, 100);
       });
     }
   });
+});
+
+// Hàm xử lý cho nút Stop scanning
+stopScanBtn.addEventListener("click", () => {
+  if (intervalId !== null) {
+    clearInterval(intervalId);
+    intervalId = null;
+    console.log("Scanning stopped.");
+
+    if (lastDetectedFace) {
+      const { x, y, width, height } = lastDetectedFace;
+
+      const faceCanvas = document.createElement("canvas");
+      faceCanvas.width = width;
+      faceCanvas.height = height;
+      const faceCtx = faceCanvas.getContext("2d");
+      faceCtx.drawImage(video, x, y, width, height, 0, 0, width, height);
+      const finalImage = faceCanvas.toDataURL("image/jpeg");
+
+      const socket = io("http://localhost:8000");
+      socket.emit("image", { image: finalImage });
+      console.log("[SocketIO] Sent final face image after stop");
+    }
+
+    stopScanBtn.classList.add("hidden");
+    startScanBtn.disabled = false;
+    startScanBtn.textContent = "Start scanning";
+  }
 });
 
 async function sendImageToBackend(base64Image) {
