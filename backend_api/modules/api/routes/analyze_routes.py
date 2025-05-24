@@ -5,10 +5,10 @@ import base64
 
 analyze_bp = Blueprint("analyze", __name__)
 
-MODEL_ENDPOINTS = {
-    "acne": "http://acne:8001/predict",
-    "wrinkle": "http://wrinkle:8002/predict",
-    "darkspot": "http://darkspot:8003/predict"
+MODEL_URLS = {
+    "acne": "http://acne_service:8001/predict",
+    "wrinkle": "http://wrinkle_service:8002/predict",
+    "darkspot": "http://darkspot_service:8003/predict"
 }
 
 async def post_image(session, url, image_bytes):

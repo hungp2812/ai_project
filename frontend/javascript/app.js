@@ -292,10 +292,13 @@ Promise.all([
 
         if (model === "acne") {
           document.getElementById("resultImage1").src = result.image;
+          document.getElementById("resultItem1").classList.add("active");
         } else if (model === "wrinkle") {
           document.getElementById("resultImage2").src = result.image;
+          document.getElementById("resultItem2").classList.add("active");
         } else if (model === "darkspot") {
           document.getElementById("resultImage3").src = result.image;
+          document.getElementById("resultItem3").classList.add("active");
         }
 
         // Ghi log kết quả phân tích
