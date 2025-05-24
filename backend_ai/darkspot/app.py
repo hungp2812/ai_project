@@ -9,7 +9,6 @@ app = Flask(__name__)
 
 onnx_session = ort.InferenceSession("dark_spot_detection_model.onnx")
 
-# Transform (PIL Image → Tensor → numpy)
 transform = T.Compose([
     T.ToTensor(),
 ])
@@ -32,7 +31,7 @@ def predict():
     font = ImageFont.load_default()
     count = 0
 
-    for box, score in zip(boxes[0], scores[0]):
+    for box, score in zip(boxes, scores):
         if score > 0.5:
             count += 1
             x1, y1, x2, y2 = map(int, box)
