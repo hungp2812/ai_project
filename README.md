@@ -30,7 +30,6 @@ Thứ giúp cho Skinsight khác biệt so với những sản phẩm cùng chứ
 -  Hỗ trợ tiếng Việt cho toàn bộ người dùng
 -  Hệ thống cơ sở dữ liệu bảo mật
 
-Để có thể chạy ứng dụng, 
 Để có thể chạy ứng dụng, người dùng chỉ cần nhập dòng lệnh này trong Docker:
 
 ```bash
@@ -67,3 +66,9 @@ Sau đây là một số thiết kế biểu đồ để hỗ trợ nắm bắt 
 <p align="center">
   <img src="svg/erd_diagram.svg" width="60%" style="margin:10px;">
 </p>
+
+## Stream
+
+## Run the app
+
+## Contributions
