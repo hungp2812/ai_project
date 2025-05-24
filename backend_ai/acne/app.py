@@ -93,11 +93,23 @@ def predict():
 
     result_image = predict_and_plot(image)
 
+    # Chạy lại model để lấy số box
+    input_img, r, left, top = preprocess_image(image)
+    ort_inputs = {session.get_inputs()[0].name: input_img}
+    outputs = session.run(None, ort_inputs)
+    boxes, _, _ = postprocess(outputs, r, left, top)
+    box_count = len(boxes)
+
+    # Trả ảnh kết quả
     img_bytes = io.BytesIO()
     result_image.save(img_bytes, format="JPEG")
     img_bytes.seek(0)
 
-    return send_file(img_bytes, mimetype="image/jpeg")
+    # Trả về response có thêm header
+    response = send_file(img_bytes, mimetype="image/jpeg")
+    response.headers["X-Box-Count"] = str(box_count)
+    return response
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8001)

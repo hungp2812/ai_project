@@ -16,9 +16,11 @@ async def post_image(session, url, image_bytes):
     data.add_field("file", image_bytes, filename="image.jpg", content_type="image/jpeg")
     try:
         async with session.post(url, data=data) as response:
-            return await response.read(), response.status
+            content = await response.read()
+            headers = dict(response.headers)
+            return content, headers, response.status
     except Exception as e:
-        return str(e), 500
+        return str(e), {}, 500
 
 @analyze_bp.route("/analyze", methods=["POST"])
 def analyze():
@@ -52,11 +54,24 @@ async def run_model_requests(image_bytes):
         responses = await asyncio.gather(*tasks.values())
 
     result_dict = {}
-    for (model_name, (content, status)) in zip(MODEL_ENDPOINTS.keys(), responses):
+    for (model_name, (content, headers, status)) in zip(MODEL_ENDPOINTS.keys(), responses):
         if status == 200:
+            img_b64 = base64.b64encode(content).decode("utf-8")
+            meta = {}
+
+            if model_name in ["acne", "darkspot"]:
+                count = headers.get("X-Box-Count")
+                if count is not None:
+                    meta["box_count"] = int(count)
+            elif model_name == "wrinkle":
+                has_wrinkle = headers.get("X-Has-Wrinkle")
+                if has_wrinkle is not None:
+                    meta["has_wrinkle"] = has_wrinkle.lower() == "true"
+
             result_dict[model_name] = {
                 "success": True,
-                "image": base64.b64encode(content).decode("utf-8")
+                "image": img_b64,
+                "meta": meta
             }
         else:
             result_dict[model_name] = {
