@@ -178,6 +178,15 @@ uploadOptionBtn.addEventListener('click', () => {
     uploadSection.classList.remove('hidden');
     uploadOptionBtn.classList.add('hidden');
     captureOptionBtn.classList.remove('hidden');
+
+    if (video.srcObject) {
+      currentStream = video.srcObject;
+      const tracks = currentStream.getTracks();
+      tracks.forEach(track => track.stop());  // Tắt từng track
+      video.srcObject = null;  // Dừng phát video
+    }
+
+    startScanBtn.classList.remove("hidden");
 });
 
 captureOptionBtn.addEventListener('click', () => {
@@ -424,5 +433,7 @@ window.addEventListener("DOMContentLoaded", () => {
     uploadedPreview.src = "";
     uploadedPreview.classList.add("hidden");
     clearUploadBtn.classList.add("hidden");
+    startScanBtn.disabled = false;
+    startScanBtn.textContent = "Start scanning";
   });
 });
