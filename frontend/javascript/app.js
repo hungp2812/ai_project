@@ -269,22 +269,14 @@ Promise.all([
 .then(() => {
   console.log("Models loaded.");
   startScanBtn.addEventListener("click", () => {
-    console.log("Starting face detection...");
     startScanBtn.disabled = true;
     startScanBtn.textContent = "Analyzing...";
-    canvas.classList.remove("hidden");
-
-    // Đảm bảo canvas khớp kích thước
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const displaySize = { width: video.videoWidth, height: video.videoHeight };
-    faceapi.matchDimensions(canvas, displaySize);
 
     const socket = io("http://localhost:5000");
     socket.on("connect", () => {
       console.log("[SocketIO] Connected", socket.id);
       socket.emit("start_scan");
-      
+
       // Lắng nghe kết quả phân tích từ backend
       socket.on("prediction", ({ model, result }) => {
         console.log("[SocketIO] Received prediction from model:", model);
@@ -318,53 +310,74 @@ Promise.all([
         const log = document.getElementById("logContent");
         log.innerHTML += `<p style="color:red;"><strong>Error:</strong> ${message}</p>`;
       })
-    });
 
-    let sendInterval = 1000; // gửi ảnh về backend mỗi 1 giây nếu phát hiện mặt
-    let lastSent = 0;
+      // Kiểm tra đang ở chế độ upload
+      if (!uploadSection.classList.contains("hidden")) {
+        const uploadedImageSrc = uploadedPreview.src;
 
-    // Bắt đầu quét liên tục
-    setInterval(async () => {
-      const detections = await faceapi.detectAllFaces(
-        video,
-        new faceapi.TinyFaceDetectorOptions()
-      );
-      const resized = faceapi.resizeResults(detections, displaySize);
-      const context = canvas.getContext("2d");
-      context.clearRect(0, 0, canvas.width, canvas.height);
+        if (!uploadedImageSrc || uploadedImageSrc === "") {
+          alert("Please upload an image first!");
+          return;
+        }
+        console.log("Sending uploaded image to backend...");
+        socket.emit("image", { image: uploadedImageSrc });
+      } else {
+        canvas.classList.remove("hidden");
 
-      if (detections.length > 0) {
-        console.log("Face detected:", detections);
-      }
-      faceapi.draw.drawDetections(canvas, resized);
+        // Đảm bảo canvas khớp kích thước
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const displaySize = { width: video.videoWidth, height: video.videoHeight };
+        faceapi.matchDimensions(canvas, displaySize);
 
-      const now = Date.now();
-      if (detections.length > 0 && now - lastSent > sendInterval) {
-        const face = detections[0].box;  // Lấy bounding box đầu tiên
-        const x = face.x;
-        const y = face.y;
-        const width = face.width;
-        const height = face.height;
+        let sendInterval = 1000; // gửi ảnh về backend mỗi 1 giây nếu phát hiện mặt
+        let lastSent = 0;
 
-        // Tạo một canvas tạm để crop phần khuôn mặt
-        const faceCanvas = document.createElement("canvas");
-        faceCanvas.width = width;
-        faceCanvas.height = height;
-        const faceCtx = faceCanvas.getContext("2d");
+        // Bắt đầu quét liên tục
+        console.log("Starting face detection...");
+        setInterval(async () => {
+          const detections = await faceapi.detectAllFaces(
+            video,
+            new faceapi.TinyFaceDetectorOptions()
+          );
+          const resized = faceapi.resizeResults(detections, displaySize);
+          const context = canvas.getContext("2d");
+          context.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Vẽ phần khuôn mặt vào canvas tạm
-        faceCtx.drawImage(video, x, y, width, height, 0, 0, width, height);
+          if (detections.length > 0) {
+            console.log("Face detected:", detections);
+          }
+          faceapi.draw.drawDetections(canvas, resized);
+
+          const now = Date.now();
+          if (detections.length > 0 && now - lastSent > sendInterval) {
+            const face = detections[0].box;  // Lấy bounding box đầu tiên
+            const x = face.x;
+            const y = face.y;
+            const width = face.width;
+            const height = face.height;
+
+            // Tạo một canvas tạm để crop phần khuôn mặt
+            const faceCanvas = document.createElement("canvas");
+            faceCanvas.width = width;
+            faceCanvas.height = height;
+            const faceCtx = faceCanvas.getContext("2d");
+
+            // Vẽ phần khuôn mặt vào canvas tạm
+            faceCtx.drawImage(video, x, y, width, height, 0, 0, width, height);
         
-        // Chuyển thành base64
-        const croppedImage = faceCanvas.toDataURL("image/jpeg");
+            // Chuyển thành base64
+            const croppedImage = faceCanvas.toDataURL("image/jpeg");
 
-        // Gửi qua socket
-        socket.emit("image", { image: croppedImage });
-        console.log("[SocketIO] Sent cropped face image");
+            // Gửi qua socket
+            socket.emit("image", { image: croppedImage });
+            console.log("[SocketIO] Sent cropped face image");
 
-        lastSent = now;
+            lastSent = now;
+          }
+        }, 100);
       }
-    }, 100);
+    });
   });
 });
 
