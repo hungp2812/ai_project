@@ -2,3 +2,6 @@ pymongo
 flask
 flask_cors
 werkzeug
+flask-socketio
+aiohttp
+eventlet

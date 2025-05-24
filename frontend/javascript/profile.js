@@ -304,12 +304,12 @@ function loadUserTable() {
         userTable.appendChild(row);
 
         row.querySelector(".deleteUserBtn").addEventListener("click", () => {
-          showDeleteModal(u._id, row); // dùng ID thật để gửi request xóa
+          showDeleteModal(u.user_id, row); // dùng ID thật để gửi request xóa
         });
 
         row.querySelector(".roleSelect").addEventListener("change", (e) => {
           const newRole = e.target.value;
-          updateUserRole(u._id, newRole);
+          updateUserRole(u.user_id, newRole);
         });
       });
     })

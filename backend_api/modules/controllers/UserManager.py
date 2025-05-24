@@ -1,6 +1,6 @@
 from User import User, UserRole
 from modules.utils.db_connector import dbConnector
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from bson import ObjectId
 # from cv2 import VideoCapture, imshow
 
@@ -61,6 +61,16 @@ class UserManager:
         )
 
         return "User information updated successfully."
+
+    def verify_password(self, password: str):
+        if password is None:
+            raise ValueError("No password provided for verification.")
+        
+        # logic to verify the password can be added here
+        if check_password_hash(self.user.password, password):
+            return True
+        else:
+            return False
         
     def face_recognition(self):
         # Placeholder for face recognition logic

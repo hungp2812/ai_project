@@ -1,20 +1,11 @@
-FROM python:3.10-slim
+FROM ai-base:latest
 
 WORKDIR /app
 
-
 COPY requirements.txt .
-
-# RUN pip install --no-cache-dir --timeout=100 gdown
-RUN pip install --no-cache-dir --timeout=100 -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# RUN link=$(head -n 1 model.txt) \
-#     && filename=$(sed -n 2p model.txt) \
-#     && echo "Downloading $filename from $link" \
-#     && gdown --fuzzy "$link" -O "$filename"
-
 EXPOSE 8003
-
 CMD ["python", "app.py"]

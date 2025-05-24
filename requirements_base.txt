@@ -1,0 +1,8 @@
+# requirements_base.txt
+numpy
+pillow
+opencv-python-headless
+onnxruntime
+torch
+torchvision
+tensorflow==2.18.0

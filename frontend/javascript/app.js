@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
       username: name,
       password: password,
       email: email,
-      role: role // nếu backend hỗ trợ role, còn không thì bỏ dòng này
+      // role: role // nếu backend hỗ trợ role, còn không thì bỏ dòng này (Mặc định là user thôi)
     };
 
     try {
