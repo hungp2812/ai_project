@@ -5,7 +5,8 @@ _Ứng dụng phân tích làn da_
 <div align="center">
 
 [![image](https://img.shields.io/badge/user%20story-docs-blue)](https://docs.google.com/document/d/1mo_M7fOjziYH-977mjpAKFkQWEb9PR8xqTluGkaoTtY/edit?usp=sharing)
-[![image](https://img.shields.io/badge/use%20case-docs-orange)](https://docs.google.com/document/d/1mo_M7fOjziYH-977mjpAKFkQWEb9PR8xqTluGkaoTtY/edit?usp=sharing)
+[![image](https://img.shields.io/badge/use%20case-docs-orange)](https://docs.google.com/document/d/1AFmHesKPbabxM99TgXOndiUx_cYlhLNPNqHa93nguaw/edit?usp=sharing)
+[![image](https://img.shields.io/badge/class%20constructions-docs-red)](https://docs.google.com/document/d/1yaEVHGXHC0jvZEk4yoto34OpL79w65XG75FAujEyQxY/edit?usp=sharing)
 
 </div>
 
