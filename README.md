@@ -77,18 +77,8 @@ Trong quá trình thiết kế ứng dụng, để giúp nắm bắt rõ hơn, n
 </p>
 
 - **Class Diagram** để khai quát hệ thống các lớp, hàm được sử dụng, các attribute và method của mỗi lớp:
-
-<!-- Screenshots -->
-<p align="center">
-  <img src="svg/class_diagram.svg" width="50%" style="margin:10px;">
-</p>
-
+- 
 - **ERD Diagram** để khái quát mối quan hệ giữa các Table trong Database
-
-<!-- Screenshots -->
-<p align="center">
-  <img src="svg/erd_diagram.svg" width="60%" style="margin:10px;">
-</p>
 
 ## Run the app
 
