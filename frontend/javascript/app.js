@@ -299,7 +299,7 @@ Promise.all([
       const displaySize = { width: video.videoWidth, height: video.videoHeight };
       faceapi.matchDimensions(canvas, displaySize);
 
-      const socket = io("http://localhost:8000");
+      const socket = io("http://localhost:5000");
       socket.on("connect", () => {
         console.log("[SocketIO] Connected", socket.id);
         socket.emit("start_scan");
