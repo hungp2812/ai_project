@@ -84,6 +84,7 @@ Trong quá trình thiết kế ứng dụng, để giúp nắm bắt rõ hơn, n
 </p>
 
 - **ERD Diagram** để khái quát mối quan hệ giữa các Table trong Database
+
 <!-- Screenshots -->
 <p align="center">
   <img src="svg/erd_diagram.svg" width="60%" style="margin:10px;">
