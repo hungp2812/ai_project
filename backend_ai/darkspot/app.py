@@ -43,7 +43,7 @@ def predict():
     img_bytes.seek(0)
 
     response = make_response(send_file(img_bytes, mimetype='image/jpeg'))
-    response.headers['X-Num-Boxes'] = str(count) 
+    response.headers['X-Box-Count'] = str(count) 
 
     return response
 
