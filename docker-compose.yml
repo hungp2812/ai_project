@@ -3,8 +3,9 @@ version: '3.8'
 services:
 
   acne_service:
-    build:
-      context: ./backend_ai/acne
+    image: hollwopelw/project-acne_service:latest
+    # build:
+    #   context: ./backend_ai/acne
     container_name: acne_service
     ports:
       - "8001:8001"
@@ -12,8 +13,9 @@ services:
       - ai_network
 
   wrinkle_service:
-    build:
-      context: ./backend_ai/wrinkle
+    image: hollwopelw/project-wrinkle_service:latest
+    # build:
+    #   context: ./backend_ai/wrinkle
     container_name: wrinkle_service
     ports:
       - "8002:8002"
@@ -21,8 +23,9 @@ services:
       - ai_network
 
   darkspot_service:
-    build:
-      context: ./backend_ai/darkspot
+    image: hollwopelw/project-darkspot_service:latest
+    # build:
+    #   context: ./backend_ai/darkspot
     container_name: darkspot_service
     ports:
       - "8003:8003"
@@ -30,11 +33,9 @@ services:
       - ai_network
 
   backend_api:
-    # tty: true
-    # stdin_open: true
-
-    build:
-      context: ./backend_api
+    image: hollwopelw/project-backend_api:latest
+    # build:
+    #   context: ./backend_api
     container_name: backend_api
     ports:
       - "5000:5000"
@@ -45,6 +46,7 @@ services:
       - mongo
     networks:
       - ai_network
+
   mongo:
     image: mongo:latest
     container_name: mongo
@@ -59,18 +61,19 @@ services:
       - ai_network
 
   frontend:
-    build:
-      context: ./frontend
+    image: hollwopelw/project-frontend:latest
+    # build:
+    #   context: ./frontend
     container_name: frontend
     ports:
-      - "3000:80"  # NGINX chạy cổng 80 nội bộ, ánh xạ ra ngoài là 3000
+      - "3000:80"
     depends_on:
       - backend_api
-      # - backend_ai
     networks:
       - ai_network
 
 networks:
   ai_network:
+
 volumes:
   mongo_data:
