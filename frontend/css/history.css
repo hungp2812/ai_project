@@ -1,0 +1,53 @@
+.history-wrapper {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  flex-wrap: wrap;
+}
+
+.scan-list {
+  flex: 1;
+  min-width: 250px;
+  max-width: 300px;
+  border-right: 2px solid #ddd;
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+.scan-entry {
+  background-color: #f8f8f8;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.scan-entry:hover {
+  background-color: #e0e0e0;
+}
+
+.scan-details {
+  flex: 2;
+  min-width: 400px;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #fafafa;
+}
+
+.result-images {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.result-images img {
+  width: 30%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.result-messages {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
