@@ -6,7 +6,6 @@ _Ứng dụng phân tích làn da_
 
 [![image](https://img.shields.io/badge/user%20story-docs-blue)](https://docs.google.com/document/d/1mo_M7fOjziYH-977mjpAKFkQWEb9PR8xqTluGkaoTtY/edit?usp=sharing)
 [![image](https://img.shields.io/badge/use%20case-docs-orange)](https://docs.google.com/document/d/1AFmHesKPbabxM99TgXOndiUx_cYlhLNPNqHa93nguaw/edit?usp=sharing)
-[![image](https://img.shields.io/badge/class%20constructions-docs-red)](https://docs.google.com/document/d/1yaEVHGXHC0jvZEk4yoto34OpL79w65XG75FAujEyQxY/edit?usp=sharing)
 
 </div>
 
@@ -77,8 +76,18 @@ Trong quá trình thiết kế ứng dụng, để giúp nắm bắt rõ hơn, n
 </p>
 
 - **Class Diagram** để khai quát hệ thống các lớp, hàm được sử dụng, các attribute và method của mỗi lớp:
-- 
+
+<!-- Screenshots -->
+<p align="center">
+  <img src="svg/class_diagram.svg" width="50%" style="margin:10px;">
+</p>
+
 - **ERD Diagram** để khái quát mối quan hệ giữa các Table trong Database
+
+<!-- Screenshots -->
+<p align="center">
+  <img src="svg/erd_diagram.svg" width="50%" style="margin:10px;">
+</p>
 
 ## Run the app
 
