@@ -13,10 +13,9 @@ _Ứng dụng phân tích làn da_
 ## Table of Contents
 
 - [About](#about)
-- [Planning and Designing](#planning-and-designing)
-- [Stream](#stream)
+- [Designing](#designing)
 - [Run the app](#run-the-app)
-- [Contributions](#contributions)
+- [Contributors](#contributors)
 
 ## About
 
