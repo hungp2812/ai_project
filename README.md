@@ -25,19 +25,11 @@ SkinSight là một sản phẩm của nhóm 5 sinh viên thuộc UET-VNU, sử 
 Thứ giúp cho Skinsight khác biệt so với những sản phẩm cùng chức năng là giao diện được thiết kế khoa học, tối giản, đồng thời sử dụng một mô hình học máy cho phép ứng dụng thực hiện phân tích một cách nhanh chóng và toàn diện, một số tính năng tiêu biểu như:
 
 -  Khả năng chạy song song trên 3 image mô hình khác nhau để cho ra kết quả nhanh, chính xác với từng loại
--  Hệ thống được tích hợp với camera của người dùng, giúp việc chụp ảnh trở nên nhanh chóng
+-  Hệ thống được tích hợp với camera của người dùng, giúp việc dự đoán theo thời gian thực trở nên nhanh chóng
 -  Tính năng chọn trong kho ảnh nếu không thể truy cập camera
--  Hỗ trợ tạo ra 1 log chi tiết về tình trạng làn da
+-  Hỗ trợ tạo ra 1 log về các vấn đề phát hiện được của tình trạng làn da
 -  Hỗ trợ tiếng Việt cho toàn bộ người dùng
 -  Hệ thống cơ sở dữ liệu bảo mật
-
-Để có thể chạy ứng dụng, người dùng chỉ cần nhập dòng lệnh này trong Docker:
-
-```bash
-docker compose up -d
-```
-
-Nếu port của bạn là 3000, thì bạn có thể truy cập ứng dụng qua <http://localhost:3000>
 
 ## Designing
 
@@ -73,8 +65,28 @@ Trong quá trình thiết kế ứng dụng, để giúp nắm bắt rõ hơn, n
   <img src="svg/erd_diagram.svg" width="60%" style="margin:10px;">
 </p>
 
-## Stream
-
 ## Run the app
 
-## Contributions
+1. Clone repository của dự án và chuyển đến thư mục chứa dự án
+```bash
+git clone https://github.com/hungp2812/ai_project.git
+cd ai_project
+```
+2. Chạy lệnh sau để pull tất cả image từ Docker Hub
+```bash
+./dockerpull_all.sh
+```
+3. Sau khi pull xong, chạy docker compose để khởi động hệ thống
+```bash
+docker-compose up -d
+```
+4. Mở trình duyệt tùy chọn và truy cập ứng dụng qua <http://localhost:3000>
+
+## Contributors
+
+Nhóm phát triển dự án bao gồm 5 thành viên:
+- Trần Xuân Bảo
+- Phạm Quốc Hùng
+- Nguyễn Khánh Tùng
+- Phan Tuấn Hiệp
+- Phan Hoàng Dũng
