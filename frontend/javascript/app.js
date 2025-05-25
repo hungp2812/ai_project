@@ -308,6 +308,55 @@ Promise.all([
           }
         }, 100);
       });
+
+      socket.on("prediction", ({ model, image, box_count, has_wrinkle, count }) => {
+        console.log("[SocketIO] Received prediction from model:", model);
+
+        // Cập nhật ảnh tương ứng
+        if (model === "acne") {
+          document.getElementById("resultImage1").src = image;
+          document.getElementById("resultItem1").classList.add("active");
+        } else if (model === "wrinkle") {
+          document.getElementById("resultImage2").src = image;
+          document.getElementById("resultItem2").classList.add("active");
+        } else if (model === "darkspot") {
+          document.getElementById("resultImage3").src = image;
+          document.getElementById("resultItem3").classList.add("active");
+        }
+
+        // Ghi log
+        const log = document.getElementById("logContent");
+        let message = "";
+
+        if (model === "acne") {
+          message = box_count > 0
+            ? `Đã phát hiện ${box_count} vùng nghi ngờ là mụn.`
+            : `Không phát hiện mụn.`;
+        } else if (model === "darkspot") {
+          message = box_count > 0
+            ? `Đã phát hiện ${box_count} vết thâm trên da.`
+            : `Không phát hiện vết thâm.`;
+        } else if (model === "wrinkle") {
+          message = has_wrinkle
+            ? `Phát hiện dấu hiệu của nếp nhăn.`
+            : `Không phát hiện nếp nhăn.`;
+        }
+
+        log.innerHTML += `<p><strong>${model.charAt(0).toUpperCase() + model.slice(1)}:</strong> ${message}</p>`;
+      });
+
+      
+      socket.on("done", ({model, results}) => {
+        const log = document.getElementById("logContent");
+        log.innerHTML += `<p style="color: green;"><strong>${model}</strong> Analysis complete ✅</p>`;
+      });
+      
+      socket.on("disconnect", () => {
+        console.log("[SocketIO] Disconnected");
+        clearInterval(intervalId);
+        intervalId = null;
+      });
+
     }
   });
 });
@@ -329,7 +378,7 @@ stopScanBtn.addEventListener("click", () => {
       faceCtx.drawImage(video, x, y, width, height, 0, 0, width, height);
       const finalImage = faceCanvas.toDataURL("image/jpeg");
 
-      const socket = io("http://localhost:8000");
+      const socket = io("http://localhost:5000");
       socket.emit("image", { image: finalImage });
       console.log("[SocketIO] Sent final face image after stop");
     }
@@ -360,19 +409,33 @@ async function sendImageToBackend(base64Image) {
     ["acne", "wrinkle", "darkspot"].forEach((model, index) => {
       const result = data[model];
       if (result && result.success) {
-        document.getElementById(`resultImage${index + 1}`).src = `data:image/jpeg;base64,${result.image}`;
+        document.getElementById(`resultImage${index + 1}`).src = result.image;
         document.getElementById(`resultItem${index + 1}`).classList.add("active");
 
-        log.innerHTML += `<p><strong>${model}</strong>: Processed ✅</p>`;
-        if (result.meta) {
-          Object.entries(result.meta).forEach(([k, v]) => {
-            log.innerHTML += `<p>${k}: ${v}</p>`;
-          });
+        let message = "";
+        const box_count = result.meta?.box_count || 0;
+        const has_wrinkle = result.meta?.has_wrinkle || false;
+
+        if (model === "acne") {
+          message = box_count > 0
+            ? `Đã phát hiện ${box_count} vùng nghi ngờ là mụn.`
+            : `Không phát hiện mụn.`;
+        } else if (model === "darkspot") {
+          message = box_count > 0
+            ? `Đã phát hiện ${box_count} vết thâm trên da.`
+            : `Không phát hiện vết thâm.`;
+        } else if (model === "wrinkle") {
+          message = has_wrinkle
+            ? `Phát hiện dấu hiệu của nếp nhăn.`
+            : `Không phát hiện nếp nhăn.`;
         }
+
+        log.innerHTML += `<p><strong>${model}:</strong> ${message}</p>`;
       } else {
         log.innerHTML += `<p style="color:red;"><strong>${model} error:</strong> ${result?.error || "Unknown error"}</p>`;
       }
     });
+
   } catch (err) {
     console.error("Error sending image to backend:", err);
     log.innerHTML += `<p style="color:red;"><strong>Request failed:</strong> ${err.message}</p>`;
