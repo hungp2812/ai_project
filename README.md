@@ -37,7 +37,32 @@ Trong quá trình thiết kế ứng dụng, để giúp nắm bắt rõ hơn, n
 - **Use Case Diagram** dùng để khái quát toàn bộ các ca sử dụng trong một lần khởi chạy ứng dụng của người dùng, gồm có:
 
   + ***Top Level Use Case***
-  
+
+<!-- Screenshots -->
+<p align="center">
+  <img src="svg/top_level_use_case.svg" style="margin:10px;">
+</p>
+
+  + ***Sign up and Log in Use Case***
+
+<!-- Screenshots -->
+<p align="center">
+  <img src="svg/sign_up_and_log_in.svg" style="margin:10px;">
+</p>
+
+  + ***Analyze skin Use Case***
+
+<!-- Screenshots -->
+<p align="center">
+  <img src="svg/skin_analyze_use_case.svg" style="margin:10px;">
+</p>
+
+  + ***Make database changes Use Case***
+
+<!-- Screenshots -->
+<p align="center">
+  <img src="svg/make_database_changes_use_case.svg" style="margin:10px;">
+</p>
 
 - **Sequence Diagram** để khai quát toàn bộ quá trình khởi động ứng dụng cho đến hết ca làm việc, cho cả người dùng lẫn quản trị viên:
 
