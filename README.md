@@ -57,6 +57,13 @@ Sau đây là một số thiết kế biểu đồ để hỗ trợ nắm bắt 
   <img src="svg/sign_up_and_log_in_use_case.svg" style="margin:10px;">
 </p>
 
+  + ***Take picture Use Case***
+
+<!-- Screenshots -->
+<p align="center">
+  <img src="svg/take_picture_use_case.svg" style="margin:10px;">
+</p>
+
 - **Sequence Diagram** để khai quát toàn bộ quá trình khởi động ứng dụng cho đến hết ca làm việc, cho cả người dùng lẫn quản trị viên:
 
 <!-- Screenshots -->
