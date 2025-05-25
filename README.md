@@ -47,7 +47,7 @@ Trong quá trình thiết kế ứng dụng, để giúp nắm bắt rõ hơn, n
 
 <!-- Screenshots -->
 <p align="center">
-  <img src="svg/sign_up_and_log_in.svg" style="margin:10px;">
+  <img src="svg/sign_up_and_log_in_use_case.svg" style="margin:10px;">
 </p>
 
   + ***Analyze skin Use Case***
