@@ -41,7 +41,12 @@ Nếu port của bạn là 3000, thì bạn có thể truy cập ứng dụng qu
 
 ## Designing
 
-Sau đây là một số thiết kế biểu đồ để hỗ trợ nắm bắt rõ hơn về ứng dụng, bao gồm:
+Trong quá trình thiết kế ứng dụng, để giúp nắm bắt rõ hơn, nhóm đã tạo ra một số thiết kế biểu đồ, bao gồm:
+
+- **Use Case Diagram** dùng để khái quát toàn bộ các ca sử dụng trong một lần khởi chạy ứng dụng của người dùng, gồm có:
+
+  + ***Top Level Use Case***
+  
 
 - **Sequence Diagram** để khai quát toàn bộ quá trình khởi động ứng dụng cho đến hết ca làm việc, cho cả người dùng lẫn quản trị viên:
 
