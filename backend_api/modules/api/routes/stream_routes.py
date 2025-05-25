@@ -1,7 +1,8 @@
 import asyncio
 import base64
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from flask_socketio import SocketIO, emit, disconnect
+from modules.api.services.log_service import save_log
 import aiohttp
 
 MODEL_URLS = {
@@ -92,6 +93,13 @@ async def process_image(sid: str, image_b64: str):
                             "model": model,
                             "results": session_data["results"][model]
                         }, to=sid)
+
+                        save_log(
+                            model=model,
+                            image=response.get("image"),
+                            box_count=box_count,
+                            has_wrinkle=has_wrinkle
+                        )
                         done_models.add(model)
 
         # Nếu tất cả model đều done thì disconnect

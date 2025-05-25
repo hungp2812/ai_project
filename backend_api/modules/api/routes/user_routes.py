@@ -53,3 +53,16 @@ def update_profile():
         return jsonify({"error": "Failed to update profile"}), 500
 
     return jsonify(updated_user), 200
+
+@user_bp.routes("/show_logs", methods=["GET"])
+def show_logs():
+    """
+    Show the logs of the logged-in user.
+    """
+    user_manager = UserManager(user_id=session.get("user_id"))
+
+    logs = user_manager.get_user_logs()
+    if not logs:
+        return jsonify({"error": "No logs found"}), 404
+
+    return jsonify(logs), 200
