@@ -37,7 +37,7 @@ Thứ giúp cho Skinsight khác biệt so với những sản phẩm cùng chứ
 docker compose up -d
 ```
 
-Nếu port của bạn là 5000, thì bạn có thể truy cập ứng dụng qua <http://localhost:5000>
+Nếu port của bạn là 3000, thì bạn có thể truy cập ứng dụng qua <http://localhost:3000>
 
 ## Designing
 
