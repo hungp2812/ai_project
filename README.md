@@ -42,6 +42,14 @@ Nếu port của bạn là 5000, thì bạn có thể truy cập ứng dụng qu
 
 Sau đây là một số thiết kế biểu đồ để hỗ trợ nắm bắt rõ hơn về ứng dụng, bao gồm:
 
+- **Use Case Diagram** khái quát toàn bộ ca sử dụng của người dùng, bao gồm:
+  + ***Top Level Use Case***
+
+<!-- Screenshots -->
+<p align="center">
+  <img src="svg/top_level_use_case.svg" style="margin:10px;">
+</p>
+
 - **Sequence Diagram** để khai quát toàn bộ quá trình khởi động ứng dụng cho đến hết ca làm việc, cho cả người dùng lẫn quản trị viên:
 
 <!-- Screenshots -->
