@@ -71,7 +71,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = document.getElementById("registerEmail").value.trim();
     const password = document.getElementById("registerPassword").value;
     const confirmPassword = document.getElementById("confirmPassword").value;
-    const role = document.getElementById("loginType").value;
 
     // Kiểm tra mật khẩu xác nhận
     if (password !== confirmPassword) {
@@ -176,6 +175,7 @@ uploadOptionBtn.addEventListener('click', () => {
     webcamSection.classList.add('hidden');
     uploadSection.classList.remove('hidden');
     uploadOptionBtn.classList.add('hidden');
+    streamOptionBtn.classList.remove('hidden');
 
     if (video.srcObject) {
       currentStream = video.srcObject;
@@ -196,6 +196,7 @@ const startScanBtn = document.getElementById("startScanBtn");
 const resultImages = document.getElementById("resultImages");
 const resultLogs = document.getElementById("resultLogs");
 const toggleBtn = document.getElementById("toggleLogBtn");
+const streamOptionBtn = document.getElementById('stream-option');
 
 activateBtn.addEventListener('click', async () => {
   startScanBtn.classList.remove("hidden");
@@ -368,20 +369,20 @@ stopScanBtn.addEventListener("click", () => {
     intervalId = null;
     console.log("Scanning stopped.");
 
-    if (lastDetectedFace) {
-      const { x, y, width, height } = lastDetectedFace;
+    // if (lastDetectedFace) {
+    //   const { x, y, width, height } = lastDetectedFace;
 
-      const faceCanvas = document.createElement("canvas");
-      faceCanvas.width = width;
-      faceCanvas.height = height;
-      const faceCtx = faceCanvas.getContext("2d");
-      faceCtx.drawImage(video, x, y, width, height, 0, 0, width, height);
-      const finalImage = faceCanvas.toDataURL("image/jpeg");
+    //   const faceCanvas = document.createElement("canvas");
+    //   faceCanvas.width = width;
+    //   faceCanvas.height = height;
+    //   const faceCtx = faceCanvas.getContext("2d");
+    //   faceCtx.drawImage(video, x, y, width, height, 0, 0, width, height);
+    //   const finalImage = faceCanvas.toDataURL("image/jpeg");
 
-      const socket = io("http://localhost:5000");
-      socket.emit("image", { image: finalImage });
-      console.log("[SocketIO] Sent final face image after stop");
-    }
+    //   const socket = io("http://localhost:5000");
+    //   socket.emit("image", { image: finalImage });
+    //   console.log("[SocketIO] Sent final face image after stop");
+    // }
 
     stopScanBtn.classList.add("hidden");
     startScanBtn.disabled = false;
@@ -391,7 +392,8 @@ stopScanBtn.addEventListener("click", () => {
 
 async function sendImageToBackend(base64Image) {
   const log = document.getElementById("logContent");
-  log.innerHTML += `<p><strong>Sending image to /analyze...</strong></p>`;
+  // log.innerHTML = ""; // Xóa log cũ trước mỗi lần gửi ảnh
+  log.innerHTML = `<p><strong>Sending image to /analyze...</strong></p>`;
 
   try {
     const response = await fetch("http://localhost:5000/analyze", {
@@ -409,7 +411,10 @@ async function sendImageToBackend(base64Image) {
     ["acne", "wrinkle", "darkspot"].forEach((model, index) => {
       const result = data[model];
       if (result && result.success) {
-        document.getElementById(`resultImage${index + 1}`).src = result.image;
+        // add prefix image format to result.image
+        image = result.image.startsWith("data:image/jpeg;base64,") ? result.image : `data:image/jpeg;base64,${result.image}`;
+
+        document.getElementById(`resultImage${index + 1}`).src = image;
         document.getElementById(`resultItem${index + 1}`).classList.add("active");
 
         let message = "";
@@ -435,6 +440,9 @@ async function sendImageToBackend(base64Image) {
         log.innerHTML += `<p style="color:red;"><strong>${model} error:</strong> ${result?.error || "Unknown error"}</p>`;
       }
     });
+
+    startScanBtn.disabled = false;
+    startScanBtn.textContent = "Start scanning";
 
   } catch (err) {
     console.error("Error sending image to backend:", err);
@@ -487,5 +495,20 @@ window.addEventListener("DOMContentLoaded", () => {
     clearUploadBtn.classList.add("hidden");
     startScanBtn.disabled = false;
     startScanBtn.textContent = "Start scanning";
+  });
+
+  streamOptionBtn.addEventListener('click', () => {
+    webcamSection.classList.remove('hidden');
+    uploadSection.classList.add('hidden');
+    uploadOptionBtn.classList.remove('hidden');
+    streamOptionBtn.classList.add('hidden');
+
+    if (video.srcObject) {
+      const tracks = video.srcObject.getTracks();
+      tracks.forEach(track => track.stop());  // Dừng tất cả các track
+      video.srcObject = null;  // Dừng phát video
+    }
+
+    startScanBtn.classList.add("hidden");
   });
 });
